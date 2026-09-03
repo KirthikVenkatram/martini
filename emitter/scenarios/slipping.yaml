@@ -1,42 +1,48 @@
 description: >
-  Day 14 holds pace through Scene 5, then Scene 42 stalls: takes pile up
-  across all three of its setups and the pace collapses, burning the
-  error budget before the martini shot.
+  Day 14 holds a quietly slower-than-scheduled pace through the morning,
+  then Scene 42 stalls hard: takes pile up across its coverage and the
+  pace collapses, burning most of the day's error budget. A quick
+  insert pickup (Scene 42D) right after wraps fast, recovering the
+  trailing pace — but the schedule slip Scene 42 already caused doesn't
+  un-happen.
 
 setups:
   1a:
-    actual_minutes: 19
-    takes: 3
+    actual_minutes: 30
+    takes: 4
   1b:
-    actual_minutes: 21
-    takes: 2
-  2a:
-    actual_minutes: 24
+    actual_minutes: 32
     takes: 3
+  2a:
+    actual_minutes: 36
+    takes: 4
   3a:
-    actual_minutes: 17
-    takes: 2
+    actual_minutes: 26
+    takes: 3
   3b:
-    actual_minutes: 20
+    actual_minutes: 30
     takes: 4
   4a:
+    actual_minutes: 36
+    takes: 4
+  5a:
     actual_minutes: 23
     takes: 3
-  5a:
-    actual_minutes: 16
-    takes: 2
   5b:
-    actual_minutes: 19
+    actual_minutes: 23
     takes: 3
   5c:
-    actual_minutes: 22
+    actual_minutes: 23
     takes: 3
   42a:
-    actual_minutes: 41
-    takes: 7
+    actual_minutes: 36
+    takes: 6
   42b:
-    actual_minutes: 58
-    takes: 11
+    actual_minutes: 51
+    takes: 9
   42c:
-    actual_minutes: 66
-    takes: 14
+    actual_minutes: 62
+    takes: 13
+  42Da:
+    actual_minutes: 10
+    takes: 2

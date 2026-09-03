@@ -6,7 +6,18 @@
       "Bash(.venv/bin/python -c \"import pydantic, yaml, pytest; print\\(pydantic.VERSION\\)\")",
       "Bash(.venv/bin/pytest tests/test_schedule.py -q)",
       "Bash(.venv/bin/pytest tests/ -q)",
-      "Bash(.venv/bin/pytest tests/ -q -W error)"
+      "Bash(.venv/bin/pytest tests/ -q -W error)",
+      "Bash(python3 -)",
+      "Bash(/Users/kirthikvenkatram/Kirthik/martini/.venv/bin/python probe2.py)",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(rm -f /private/tmp/claude-501/-Users-kirthikvenkatram-Kirthik-martini/51dfd490-f2f2-43e4-bdc7-6242ac8a0527/scratchpad/probe*.py *)",
+      "Bash(.venv/bin/pytest tests/ -v)",
+      "Bash(python3 -c ' *)",
+      "Bash(/Users/kirthikvenkatram/Kirthik/martini/.venv/bin/python probe9.py)",
+      "Bash(/Users/kirthikvenkatram/Kirthik/martini/.venv/bin/python probe11.py)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp/claude-501/-Users-kirthikvenkatram-Kirthik-martini/51dfd490-f2f2-43e4-bdc7-6242ac8a0527/scratchpad"
     ]
   }
 }
