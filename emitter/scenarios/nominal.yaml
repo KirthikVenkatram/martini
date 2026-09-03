@@ -1,0 +1,42 @@
+description: >
+  Day 14 plays out close to plan. Every setup lands near its estimate,
+  including Scene 42, the day's last scene before the martini shot. The
+  day makes its scheduled wrap.
+
+setups:
+  1a:
+    actual_minutes: 18
+    takes: 3
+  1b:
+    actual_minutes: 22
+    takes: 2
+  2a:
+    actual_minutes: 25
+    takes: 3
+  3a:
+    actual_minutes: 16
+    takes: 2
+  3b:
+    actual_minutes: 20
+    takes: 4
+  4a:
+    actual_minutes: 24
+    takes: 3
+  5a:
+    actual_minutes: 15
+    takes: 2
+  5b:
+    actual_minutes: 18
+    takes: 3
+  5c:
+    actual_minutes: 21
+    takes: 3
+  42a:
+    actual_minutes: 22
+    takes: 4
+  42b:
+    actual_minutes: 26
+    takes: 3
+  42c:
+    actual_minutes: 19
+    takes: 2
