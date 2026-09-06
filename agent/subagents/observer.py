@@ -32,6 +32,7 @@ class DayObservation(BaseModel):
     setups_completed: int
     setups_total: int
     projected_wrap_offset_minutes: float
+    minutes_to_golden_hour: int
     firing_alerts: list[str]
     observed_at: datetime
 

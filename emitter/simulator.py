@@ -16,7 +16,7 @@ from typing import Callable
 
 import yaml
 
-from emitter.models import PageEighths, Scene, ShootingDay, Setup
+from emitter.models import PageEighths, Performer, Scene, ShootingDay, Setup
 from emitter.otel import Instruments
 
 SCENARIOS_DIR = Path(__file__).parent / "scenarios"
@@ -42,6 +42,75 @@ SETUP_SCENES = {
     "5a": "5", "5b": "5", "5c": "5",
     "42a": "42", "42b": "42B", "42c": "42C",
     "42Da": RECOVERY_SCENE_NUMBER,
+}
+
+# Invented cast (no real people). PRIYA is the lead and only appears in
+# the padding scene (43) -- the one scene with no fixed position in the
+# shooting order, and so the one a reorder/pickup option is most likely
+# to touch. Her previous_night_wrap is set close enough to this day's
+# general call that any proposed call earlier than mid-morning breaches
+# her 11-hour turnaround -- the gate rejection this demo is built
+# around. JUNO is a minor whose ordinary 09:00 call already sits close
+# to the 9-hour/19:00 wrap limit, so pushing her into an evening slot
+# breaches it.
+PRIYA = Performer(
+    id="priya",
+    name="Priya Osei",
+    character_name="PRIYA",
+    call_time=datetime(2026, 9, 3, 11, 0),
+    previous_night_wrap=datetime(2026, 9, 2, 23, 30),
+    minimum_turnaround_hours=11.0,
+    is_minor=False,
+)
+MARCUS = Performer(
+    id="marcus",
+    name="Marcus Feld",
+    character_name="MARCUS",
+    call_time=datetime(2026, 9, 3, 7, 0),
+    previous_night_wrap=datetime(2026, 9, 2, 19, 0),
+    minimum_turnaround_hours=11.0,
+    is_minor=False,
+)
+ELENA = Performer(
+    id="elena",
+    name="Elena Cho",
+    character_name="ELENA",
+    call_time=datetime(2026, 9, 3, 7, 30),
+    previous_night_wrap=datetime(2026, 9, 2, 20, 0),
+    minimum_turnaround_hours=11.0,
+    is_minor=False,
+)
+DESMOND = Performer(
+    id="desmond",
+    name="Desmond Ruiz",
+    character_name="DESMOND",
+    call_time=datetime(2026, 9, 3, 8, 0),
+    previous_night_wrap=datetime(2026, 9, 2, 20, 30),
+    minimum_turnaround_hours=11.0,
+    is_minor=False,
+)
+JUNO = Performer(
+    id="juno",
+    name="Juno Ahn",
+    character_name="JUNO",
+    call_time=datetime(2026, 9, 3, 9, 0),
+    previous_night_wrap=datetime(2026, 9, 2, 20, 0),
+    minimum_turnaround_hours=12.0,
+    is_minor=True,
+)
+PERFORMERS = [PRIYA, MARCUS, ELENA, DESMOND, JUNO]
+
+SCENE_CAST = {
+    "1": ["marcus", "elena"],
+    "2": ["marcus", "desmond"],
+    "3": ["elena", "juno"],
+    "4": ["desmond", "juno"],
+    "5": ["marcus", "elena", "desmond"],
+    "42": ["elena", "desmond"],
+    "42B": ["marcus", "juno"],
+    "42C": ["elena"],
+    PADDING_SCENE_NUMBER: ["priya", "marcus"],
+    RECOVERY_SCENE_NUMBER: ["elena", "desmond"],
 }
 
 
@@ -75,7 +144,7 @@ def build_day(scenario_name: str) -> ShootingDay:
             int_ext="INT",
             day_night="DAY",
             location="Set",
-            cast_ids=[],
+            cast_ids=SCENE_CAST.get(number, []),
             estimated_setups=1,
         )
         for number, eighths in scene_eighths.items()
@@ -102,7 +171,7 @@ def build_day(scenario_name: str) -> ShootingDay:
         meal_due_by=MEAL_DUE_BY,
         scenes=scenes,
         setups=setups,
-        performers=[],
+        performers=PERFORMERS,
     )
 
 

@@ -1,0 +1,28 @@
+turnaround:
+  minimum_hours: 11.0
+  minor_minimum_hours: 12.0
+  description: >-
+    Places {name} {shortfall} inside the required turnaround -- {name}
+    needs {required} between wrap and next call, this call time gives
+    {name} {given}.
+
+meal:
+  max_hours_between_breaks: 6.0
+  penalty_per_half_hour: true
+  description: >-
+    Runs the crew past their meal window -- lunch is due by
+    {meal_due_by} and this option still has people working at {latest}.
+
+minors:
+  max_working_hours: 9.0
+  must_wrap_by: "19:00"
+  description: >-
+    {name} is a minor and must wrap by {must_wrap_by} -- this option
+    has {name} working until {projected_wrap}, {shortfall} past that
+    limit.
+
+crew_rest:
+  minimum_hours_between_days: 10.0
+  description: >-
+    Crew need at least {minimum_hours} hours between the end of one
+    shooting day and the call for the next.

@@ -30,6 +30,7 @@ OBSERVATION = DayObservation(
     setups_completed=12,
     setups_total=20,
     projected_wrap_offset_minutes=47.0,
+    minutes_to_golden_hour=210,
     firing_alerts=[],
     observed_at="2026-09-04T14:32:00",
 )
@@ -180,7 +181,7 @@ def test_open_day_incident_falls_back_to_annotation_when_incident_tool_fails(mon
     session = _FakeSession(
         {
             "create_incident": _FakeResult(is_error=True, error_text="incident feature unavailable"),
-            "create_annotation": _FakeResult({"id": 42}),
+            "create_annotation": _FakeResult({"Payload": {"id": 42, "message": "Annotation added"}}),
         }
     )
     _patch_connect(monkeypatch, session)

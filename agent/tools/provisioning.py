@@ -337,4 +337,8 @@ async def open_day_incident(day: ShootingDay, observation: DayObservation, summa
                     "tags": ["martini", f"day-{day.day_number}"],
                 },
             )
-            return f"annotation:{annotation['id']}"
+            # create_annotation's real response nests the id under "Payload"
+            # -- confirmed live (grafana/mcp-grafana v1.3.0); a bare "id" at
+            # the top level, as this used to assume, doesn't exist on the
+            # actual response and raised KeyError on every fallback.
+            return f"annotation:{annotation['Payload']['id']}"

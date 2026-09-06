@@ -25,6 +25,7 @@ VALID_PAYLOAD = {
     "setups_completed": 12,
     "setups_total": 20,
     "projected_wrap_offset_minutes": 47.0,
+    "minutes_to_golden_hour": 210,
     "firing_alerts": ["martini_error_budget_burn"],
     "observed_at": "2026-09-04T14:32:00",
 }

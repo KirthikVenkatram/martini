@@ -20,6 +20,9 @@ The emitter exports these OTel gauge metrics under the meter
 - `martini_setups_total` -- total camera setups planned for the day
 - `martini_projected_wrap_offset_minutes` -- minutes the projected wrap
   time is ahead of (negative) or behind (positive) the scheduled wrap
+- `martini_minutes_to_golden_hour` -- minutes until golden hour starts
+  (negative once it has passed) -- the day's own simulated clock, not
+  wall-clock time, so read this rather than computing it yourself
 
 Use `query_prometheus` with an instant query for each metric name to
 get its current value (e.g. `martini_error_budget_consumed`).
@@ -43,6 +46,7 @@ object must have exactly these keys:
   "setups_completed": <integer>,
   "setups_total": <integer>,
   "projected_wrap_offset_minutes": <number>,
+  "minutes_to_golden_hour": <integer>,
   "firing_alerts": [<string>, ...],
   "observed_at": "<ISO 8601 timestamp>"
 }
