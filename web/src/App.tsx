@@ -26,7 +26,7 @@ export default function App() {
         <StartButton status={snapshot.status} />
       </div>
       {snapshot.error_message && (
-        <p className="px-4 py-2 font-body text-sm text-burn">{snapshot.error_message}</p>
+        <p className="px-4 py-2 font-body text-sm text-paper/70">Stalled: {snapshot.error_message}</p>
       )}
       <StripBoard
         scenes={snapshot.scenes}

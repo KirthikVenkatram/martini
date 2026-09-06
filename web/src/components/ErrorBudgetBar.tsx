@@ -23,7 +23,7 @@ export function ErrorBudgetBar({ snapshot }: { snapshot: DaySnapshot }) {
         aria-valuemax={100}
         aria-label="Error budget consumed"
       >
-        <div className="h-full bg-burn transition-[width] duration-700 ease-out" style={{ width: `${percent}%` }} />
+        <div className="h-full bg-paper transition-[width] duration-700 ease-out" style={{ width: `${percent}%` }} />
       </div>
       <p className="mt-3 font-body text-base text-paper/80">
         {pagesRemainingDisplay(snapshot.pages_remaining_eighths)} pages remaining
