@@ -1,0 +1,10 @@
+{
+  "dashboard_uid": "martini-day-14",
+  "dashboard_url": "https://copperpear1768.grafana.net/d/martini-day-14",
+  "alert_rule_uid": "cfxgtbc1xcvlsa",
+  "alert_rule_url": "https://copperpear1768.grafana.net/alerting/grafana/cfxgtbc1xcvlsa/view",
+  "burn_rate_threshold": 1.4,
+  "evaluation_window_minutes": 10,
+  "annotation": "We're moving too slowly and starting to eat into our overtime buffer, so let's look at simplifying the next setup.",
+  "provisioned_at": "2026-09-06T19:46:17.961787Z"
+}
