@@ -99,6 +99,33 @@ def _base_snapshot(
     )
 
 
+def _carry_forward_snapshot(
+    day: ShootingDay, run_id: int, status: Status, event_type: EventType, *, error_message: str | None = None
+) -> DaySnapshot:
+    """Builds the wrapped/error snapshot from the last real tick rather
+    than resetting progress fields (clock, pages, budget, burn rate) to
+    their defaults -- the day still finished at a specific time with a
+    specific budget consumed, and the console shouldn't flash back to
+    zero at the exact moment it wraps."""
+    with STATE.lock:
+        last = STATE.last_snapshot
+        provisioning = STATE.provisioning
+        recovery = STATE.recovery
+    if last is not None and last.run_id == run_id:
+        return last.model_copy(
+            update={
+                "event_type": event_type,
+                "status": status,
+                "error_message": error_message,
+                "provisioning": provisioning,
+                "recovery": recovery,
+                "shot_scene_numbers": shot_scene_numbers(day),
+                "current_scene": None,
+            }
+        )
+    return _base_snapshot(day, run_id, status, event_type, error_message=error_message)
+
+
 def _tick_snapshot(day: ShootingDay, run_id: int, status: Status, event: dict) -> DaySnapshot:
     now: datetime = event["now"]
     snapshot = _base_snapshot(day, run_id, status, event["type"])
@@ -138,7 +165,7 @@ def _trigger_recovery_if_at_risk(day: ShootingDay, run_id: int, now: datetime) -
             return
         STATE.recovery = recovery
 
-    STATE.publish(_base_snapshot(day, run_id, "at_risk", "recovery"))
+    STATE.publish(_carry_forward_snapshot(day, run_id, "at_risk", "recovery"))
 
 
 def run_replay(scenario_name: str, run_id: int) -> None:
@@ -163,13 +190,13 @@ def run_replay(scenario_name: str, run_id: int) -> None:
         if STATE.is_current(run_id):
             with STATE.lock:
                 STATE.status = "error"
-            STATE.publish(_base_snapshot(day, run_id, "error", "error", error_message=str(exc)))
+            STATE.publish(_carry_forward_snapshot(day, run_id, "error", "error", error_message=str(exc)))
         return
 
     if STATE.is_current(run_id):
         with STATE.lock:
             STATE.status = "wrapped"
-        STATE.publish(_base_snapshot(day, run_id, "wrapped", "wrapped"))
+        STATE.publish(_carry_forward_snapshot(day, run_id, "wrapped", "wrapped"))
 
 
 def start_replay(scenario_name: str) -> int | None:
