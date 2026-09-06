@@ -10,6 +10,8 @@ dependencies = [
     "opentelemetry-exporter-otlp-proto-http==1.42.1",
     "python-dotenv>=1",
     "google-adk[mcp]==2.8.0",
+    "fastapi==0.141.1",
+    "uvicorn[standard]==0.52.4",
 ]
 
 [project.optional-dependencies]
@@ -22,4 +24,4 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["emitter*", "agent*", "gate*"]
+include = ["emitter*", "agent*", "gate*", "server*"]
