@@ -219,4 +219,5 @@ __marimo__/
 
 .env
 web/node_modules/
+!web/dist/
 CLAUDE.md
