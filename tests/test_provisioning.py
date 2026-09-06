@@ -92,10 +92,16 @@ def test_provisioning_result_parses():
         dashboard_uid="martini-day-14",
         dashboard_url="https://example.grafana.net/d/martini-day-14",
         alert_rule_uid="abc123",
+        alert_rule_url="https://example.grafana.net/alerting/grafana/abc123/view",
+        burn_rate_threshold=1.35,
+        evaluation_window_minutes=10,
+        annotation="Losing time against Scene 42.",
         provisioned_at="2026-09-06T15:00:00Z",
     )
 
     assert result.dashboard_uid == "martini-day-14"
+    assert result.alert_rule_url == "https://example.grafana.net/alerting/grafana/abc123/view"
+    assert result.burn_rate_threshold == 1.35
 
 
 class _FakeResult:

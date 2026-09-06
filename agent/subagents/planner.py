@@ -38,6 +38,10 @@ class ProvisioningResult(BaseModel):
     dashboard_uid: str
     dashboard_url: str
     alert_rule_uid: str
+    alert_rule_url: str
+    burn_rate_threshold: float
+    evaluation_window_minutes: int
+    annotation: str
     provisioned_at: datetime
 
 
@@ -116,5 +120,9 @@ async def provision(day: ShootingDay) -> ProvisioningResult:
         dashboard_uid=dashboard_uid,
         dashboard_url=f"{GRAFANA_URL.rstrip('/')}/d/{dashboard_uid}",
         alert_rule_uid=alert_rule_uid,
+        alert_rule_url=f"{GRAFANA_URL.rstrip('/')}/alerting/grafana/{alert_rule_uid}/view",
+        burn_rate_threshold=plan.burn_rate_threshold,
+        evaluation_window_minutes=plan.evaluation_window_minutes,
+        annotation=plan.annotation,
         provisioned_at=datetime.now(timezone.utc),
     )

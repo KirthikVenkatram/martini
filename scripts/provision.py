@@ -24,6 +24,8 @@ def main() -> None:
     print(f"  dashboard uid   : {result.dashboard_uid}")
     print(f"  dashboard url   : {result.dashboard_url}")
     print(f"  alert rule uid  : {result.alert_rule_uid}")
+    print(f"  burn-rate alert : armed at {result.burn_rate_threshold}x/{result.evaluation_window_minutes}m")
+    print(f"  annotation      : {result.annotation}")
 
 
 if __name__ == "__main__":
