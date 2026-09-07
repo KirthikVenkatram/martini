@@ -15,15 +15,26 @@ function Strip({ scene, state }: { scene: SceneSnapshot; state: StripState }) {
       className={[
         "flex items-center gap-2 rounded-[2px] px-2.5 py-1 font-narrow",
         STRIP_CLASS[scene.strip_color],
-        state === "remaining" ? "opacity-40" : "opacity-100",
+        state === "shot" ? "opacity-40" : "opacity-100",
         state === "current" ? "strip-current ring-2 ring-paper" : "",
       ].join(" ")}
     >
+      <span className="w-3 shrink-0 text-xs font-bold" aria-hidden={state !== "shot"}>
+        {state === "shot" ? "✓" : ""}
+      </span>
       <span className="w-10 shrink-0 text-xs font-semibold tracking-wide">Sc.{scene.number}</span>
       <span className="flex-1 truncate text-xs">{scene.synopsis}</span>
       <span className="hidden shrink-0 text-[11px] opacity-70 sm:inline">{scene.cast_names.join(", ") || "—"}</span>
       <span className="w-12 shrink-0 text-right text-[11px] font-semibold">{scene.page_eighths_display} pg</span>
     </li>
+  );
+}
+
+function SectionLabel({ label }: { label: string }) {
+  return (
+    <p className="mb-1 mt-2.5 px-0.5 font-narrow text-[10px] uppercase tracking-widest text-paper/40 first:mt-0">
+      {label}
+    </p>
   );
 }
 
@@ -37,18 +48,26 @@ export function StripBoard({
   shotScenes: string[];
 }) {
   const shot = new Set(shotScenes);
+  const shotList = scenes.filter((scene) => shot.has(scene.number));
+  const toGoList = scenes.filter((scene) => !shot.has(scene.number));
 
   return (
     <section aria-label="Strip board" className="px-4 py-3">
+      {shotList.length > 0 && (
+        <>
+          <SectionLabel label="Shot" />
+          <ul className="flex flex-col gap-0.5">
+            {shotList.map((scene) => (
+              <Strip key={scene.number} scene={scene} state="shot" />
+            ))}
+          </ul>
+        </>
+      )}
+      <SectionLabel label="To go" />
       <ul className="flex flex-col gap-0.5">
-        {scenes.map((scene) => {
-          const state: StripState = shot.has(scene.number)
-            ? "shot"
-            : scene.number === currentScene
-              ? "current"
-              : "remaining";
-          return <Strip key={scene.number} scene={scene} state={state} />;
-        })}
+        {toGoList.map((scene) => (
+          <Strip key={scene.number} scene={scene} state={scene.number === currentScene ? "current" : "remaining"} />
+        ))}
       </ul>
     </section>
   );

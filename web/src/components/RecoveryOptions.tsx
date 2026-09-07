@@ -45,6 +45,16 @@ function OptionCard({
   );
 }
 
+function optionsHeadline(verdicts: RecoverySnapshot["result"]["verdicts"]): string {
+  const rejectedCount = verdicts.filter((v) => !v.approved).length;
+  if (rejectedCount === 0) return "MARTINI found two ways to make the day. Both are legal.";
+  if (rejectedCount === verdicts.length) return "MARTINI found two ways to make the day. Both break a rule.";
+  return "MARTINI found two ways to make the day. One breaks a rule.";
+}
+
+/** Answers "what do I do about it?" -- the third of the three
+ * questions the console leads with. Rejected renders first; its
+ * reason is left exactly as gate/checker.py wrote it. */
 export function RecoveryOptions({ recovery }: { recovery: RecoverySnapshot }) {
   const [approvedId, setApprovedId] = useState<string | null>(null);
   const verdictsById = new Map(recovery.result.verdicts.map((v) => [v.option_id, v]));
@@ -53,6 +63,7 @@ export function RecoveryOptions({ recovery }: { recovery: RecoverySnapshot }) {
 
   return (
     <section aria-label="Recovery options" className="flex flex-col gap-2.5 px-4 py-3">
+      <p className="font-narrow text-sm font-semibold text-paper">{optionsHeadline(recovery.result.verdicts)}</p>
       {!recovery.result.live && (
         <p className="font-body text-xs italic text-paper/50">
           Recovery options from a cached run — Gemini daily quota reached.
@@ -71,16 +82,6 @@ export function RecoveryOptions({ recovery }: { recovery: RecoverySnapshot }) {
           />
         );
       })}
-      {recovery.incident_url && (
-        <a
-          href={recovery.incident_url}
-          target="_blank"
-          rel="noreferrer"
-          className="font-body text-xs text-paper/50 underline decoration-paper/30"
-        >
-          View incident in Grafana
-        </a>
-      )}
     </section>
   );
 }

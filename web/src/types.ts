@@ -90,4 +90,10 @@ export interface DaySnapshot {
   burn_rate: number;
   projected_wrap: string | null;
   recovery: RecoverySnapshot | null;
+  verdict_headline: string;
+  verdict_subline: string;
+  budget_sentence: string;
+  burn_sentence: string;
+  pages_sentence: string;
+  cost_of_delay_sentence: string;
 }

@@ -1,9 +1,10 @@
 import { ErrorBudgetBar } from "./components/ErrorBudgetBar";
 import { Header } from "./components/Header";
-import { ProvisioningLog } from "./components/ProvisioningLog";
+import { ProvisioningFooter } from "./components/ProvisioningFooter";
 import { RecoveryOptions } from "./components/RecoveryOptions";
 import { StartButton } from "./components/StartButton";
 import { StripBoard } from "./components/StripBoard";
+import { Verdict } from "./components/Verdict";
 import { useDaySnapshot } from "./hooks/useDaySnapshot";
 
 export default function App() {
@@ -19,9 +20,9 @@ export default function App() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col bg-board text-paper">
-      <ProvisioningLog provisioning={snapshot.provisioning} />
       <div className="bg-paper text-ink">
         <Header snapshot={snapshot} />
+        <Verdict snapshot={snapshot} />
         <ErrorBudgetBar snapshot={snapshot} />
       </div>
       <div className="flex justify-center px-4 py-2">
@@ -40,6 +41,12 @@ export default function App() {
           <RecoveryOptions recovery={snapshot.recovery} />
         </div>
       )}
+      <div className="mt-auto">
+        <ProvisioningFooter
+          provisioning={snapshot.provisioning}
+          incidentUrl={snapshot.recovery?.incident_url ?? null}
+        />
+      </div>
     </main>
   );
 }
