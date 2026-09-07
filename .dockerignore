@@ -1,0 +1,14 @@
+.venv
+node_modules
+.git
+.env
+.env.example
+__pycache__
+*.pyc
+.pytest_cache
+martini.egg-info
+docs
+tests
+.claude
+web/node_modules
+web/dist
