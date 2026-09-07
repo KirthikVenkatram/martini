@@ -83,6 +83,8 @@ def test_initial_snapshot_reports_idle_with_the_default_scenario_plan():
     assert snapshot.day_number == 14
     assert snapshot.scenes  # the default-scenario plan is always available
     assert snapshot.total_page_eighths > 0
+    # At idle, "remaining" is the whole day's pages -- nothing shot yet.
+    assert snapshot.pages_remaining_eighths == snapshot.total_page_eighths
 
 
 def test_initial_snapshot_falls_back_to_provisioning_state():

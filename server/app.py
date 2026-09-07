@@ -79,6 +79,7 @@ def _initial_snapshot() -> DaySnapshot:
         production_title=day.production_title,
         provisioning=provisioning,
         scenes=scene_snapshots(day),
+        pages_remaining_eighths=day.total_page_eighths.eighths,
         total_page_eighths=day.total_page_eighths.eighths,
         setups_total=day.total_setups,
     )
