@@ -44,6 +44,17 @@ def test_on_event_fires_once_per_setup():
     assert [e["setup"] for e in setup_wrapped] == list(scenario.keys())
 
 
+def test_day_shows_a_real_mix_of_all_four_strip_colours():
+    # The strip board's core visual idea: scenes must actually vary by
+    # INT/EXT and DAY/NIGHT, not default to the same slot -- and every
+    # scene needs real invented content, not a "Scene {number}" placeholder.
+    day = build_day("slipping")
+
+    strip_colors = {scene.strip_color for scene in day.scenes}
+    assert strip_colors == {"day-int", "day-ext", "night-int", "night-ext"}
+    assert all(not scene.synopsis.startswith("Scene ") for scene in day.scenes)
+
+
 def test_dry_run_makes_no_network_calls():
     day = build_day("nominal")
     scenario = load_scenario("nominal")

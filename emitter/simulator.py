@@ -113,6 +113,27 @@ SCENE_CAST = {
     RECOVERY_SCENE_NUMBER: ["elena", "desmond"],
 }
 
+# Invented story content -- an invented quarry-town drama, no real film,
+# studio, or person. Spans a believable mix of all four strip colours
+# (the strip board's core visual idea) rather than defaulting every
+# scene to the same slot. Scene 43 (PADDING_SCENE_NUMBER) is PRIYA's
+# only scene on this day and the one gate/rules/production_rules.yaml's
+# turnaround rule ends up rejecting a reorder into -- it needs a real
+# stake, not a placeholder, since it's what the rejection card argues
+# over.
+SCENE_CONTENT = {
+    "1": ("MARCUS and ELENA argue over the household accounts before the crew arrives.", "INT", "DAY"),
+    "2": ("MARCUS presses DESMOND for the truck keys he's been avoiding handing over.", "INT", "DAY"),
+    "3": ("ELENA waits with JUNO at the crossing, dodging her questions about last night.", "EXT", "DAY"),
+    "4": ("DESMOND warns JUNO off the quarry road before the blasting crew arrives.", "EXT", "DAY"),
+    "5": ("The three of them corner each other in the site office over the missing ledger.", "INT", "NIGHT"),
+    "42": ("ELENA and DESMOND finally say what's been unsaid at the reservoir's edge.", "EXT", "NIGHT"),
+    "42B": ("MARCUS drives JUNO home in silence, the radio the only thing talking.", "INT", "NIGHT"),
+    "42C": ("ELENA walks the reservoir path alone, turning the night over in her head.", "EXT", "NIGHT"),
+    RECOVERY_SCENE_NUMBER: ("One last look back at the water before DESMOND cuts the engine.", "EXT", "NIGHT"),
+    PADDING_SCENE_NUMBER: ("PRIYA returns to the quarry gate and tells MARCUS she's selling her share.", "EXT", "DAY"),
+}
+
 
 def load_scenario(name: str) -> dict[str, dict]:
     with open(SCENARIOS_DIR / f"{name}.yaml") as f:
@@ -136,19 +157,21 @@ def build_day(scenario_name: str) -> ShootingDay:
         scene_eighths[RECOVERY_SCENE_NUMBER] = RECOVERY_SCENE_EIGHTHS
     scene_eighths[PADDING_SCENE_NUMBER] = TOTAL_PAGE_EIGHTHS - sum(scene_eighths.values())
 
-    scenes = [
-        Scene(
-            number=number,
-            synopsis=f"Scene {number}",
-            page_eighths=PageEighths(eighths=eighths),
-            int_ext="INT",
-            day_night="DAY",
-            location="Set",
-            cast_ids=SCENE_CAST.get(number, []),
-            estimated_setups=1,
+    scenes = []
+    for number, eighths in scene_eighths.items():
+        synopsis, int_ext, day_night = SCENE_CONTENT.get(number, (f"Scene {number}", "INT", "DAY"))
+        scenes.append(
+            Scene(
+                number=number,
+                synopsis=synopsis,
+                page_eighths=PageEighths(eighths=eighths),
+                int_ext=int_ext,
+                day_night=day_night,
+                location="Set",
+                cast_ids=SCENE_CAST.get(number, []),
+                estimated_setups=1,
+            )
         )
-        for number, eighths in scene_eighths.items()
-    ]
 
     setups = [
         Setup(
