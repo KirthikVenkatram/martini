@@ -3,7 +3,7 @@ import type { ProvisioningSnapshot } from "../types";
 export function ProvisioningLog({ provisioning }: { provisioning: ProvisioningSnapshot | null }) {
   if (!provisioning) {
     return (
-      <div className="border-b border-paper/10 px-4 py-2 font-body text-xs text-paper/50">
+      <div className="border-b border-paper/10 px-4 py-1.5 font-body text-xs text-paper/50">
         Provisioning unavailable — no live Grafana connection and no cached run on record.
       </div>
     );
@@ -12,7 +12,7 @@ export function ProvisioningLog({ provisioning }: { provisioning: ProvisioningSn
   const { info, live } = provisioning;
 
   return (
-    <div className="border-b border-paper/10 px-4 py-2 font-body text-xs leading-relaxed text-paper/70">
+    <div className="border-b border-paper/10 px-4 py-1.5 font-body text-xs leading-relaxed text-paper/70">
       <div>
         <a
           className="underline decoration-paper/40 hover:decoration-paper"

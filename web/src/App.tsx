@@ -20,20 +20,26 @@ export default function App() {
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col bg-board text-paper">
       <ProvisioningLog provisioning={snapshot.provisioning} />
-      <Header snapshot={snapshot} />
-      <ErrorBudgetBar snapshot={snapshot} />
-      <div className="flex justify-center px-4 pb-2">
+      <div className="bg-paper text-ink">
+        <Header snapshot={snapshot} />
+        <ErrorBudgetBar snapshot={snapshot} />
+      </div>
+      <div className="flex justify-center px-4 py-2">
         <StartButton status={snapshot.status} />
       </div>
       {snapshot.error_message && (
-        <p className="px-4 py-2 font-body text-sm text-paper/70">Stalled: {snapshot.error_message}</p>
+        <p className="px-4 py-1 font-body text-xs text-paper/70">Stalled: {snapshot.error_message}</p>
       )}
       <StripBoard
         scenes={snapshot.scenes}
         currentScene={snapshot.current_scene}
         shotScenes={snapshot.shot_scene_numbers}
       />
-      {snapshot.recovery && <RecoveryOptions recovery={snapshot.recovery} />}
+      {snapshot.recovery && (
+        <div className="mt-2 border-t border-paper/10 pt-1">
+          <RecoveryOptions recovery={snapshot.recovery} />
+        </div>
+      )}
     </main>
   );
 }

@@ -13,16 +13,16 @@ function Strip({ scene, state }: { scene: SceneSnapshot; state: StripState }) {
   return (
     <li
       className={[
-        "flex items-center gap-3 rounded-sm px-3 py-2 font-narrow",
+        "flex items-center gap-2 rounded-[2px] px-2.5 py-1 font-narrow",
         STRIP_CLASS[scene.strip_color],
         state === "remaining" ? "opacity-40" : "opacity-100",
         state === "current" ? "strip-current ring-2 ring-paper" : "",
       ].join(" ")}
     >
-      <span className="text-sm font-semibold tracking-wide">Sc. {scene.number}</span>
-      <span className="flex-1 truncate text-sm">{scene.synopsis}</span>
-      <span className="hidden text-xs opacity-70 sm:inline">{scene.cast_names.join(", ") || "—"}</span>
-      <span className="text-xs font-semibold">{scene.page_eighths_display} pg</span>
+      <span className="w-10 shrink-0 text-xs font-semibold tracking-wide">Sc.{scene.number}</span>
+      <span className="flex-1 truncate text-xs">{scene.synopsis}</span>
+      <span className="hidden shrink-0 text-[11px] opacity-70 sm:inline">{scene.cast_names.join(", ") || "—"}</span>
+      <span className="w-12 shrink-0 text-right text-[11px] font-semibold">{scene.page_eighths_display} pg</span>
     </li>
   );
 }
@@ -39,8 +39,8 @@ export function StripBoard({
   const shot = new Set(shotScenes);
 
   return (
-    <section aria-label="Strip board" className="px-4 py-4">
-      <ul className="flex flex-col gap-1.5">
+    <section aria-label="Strip board" className="px-4 py-3">
+      <ul className="flex flex-col gap-0.5">
         {scenes.map((scene) => {
           const state: StripState = shot.has(scene.number)
             ? "shot"

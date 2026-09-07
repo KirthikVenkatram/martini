@@ -14,18 +14,22 @@ export function ErrorBudgetBar({ snapshot }: { snapshot: DaySnapshot }) {
   const percent = Math.round(consumed * 100);
 
   return (
-    <section className="px-4 py-6" aria-label="Error budget">
+    <section className="px-4 pb-3 pt-2" aria-label="Error budget">
+      <div className="flex items-baseline justify-between">
+        <p className="font-narrow text-[11px] uppercase tracking-widest text-ink/50">Error budget</p>
+        <p className="font-narrow text-[11px] uppercase tracking-widest text-ink/50">{percent}% consumed</p>
+      </div>
       <div
-        className="h-10 w-full overflow-hidden rounded-sm bg-paper/10"
+        className="mt-1 h-7 w-full overflow-hidden rounded-sm bg-ink/10"
         role="progressbar"
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="Error budget consumed"
       >
-        <div className="h-full bg-paper transition-[width] duration-700 ease-out" style={{ width: `${percent}%` }} />
+        <div className="h-full bg-ink transition-[width] duration-700 ease-out" style={{ width: `${percent}%` }} />
       </div>
-      <p className="mt-3 font-body text-base text-paper/80">
+      <p className="mt-1.5 font-body text-sm text-ink/80">
         {pagesRemainingDisplay(snapshot.pages_remaining_eighths)} pages remaining
         {snapshot.projected_wrap ? ` · wrap projected ${snapshot.projected_wrap}` : ""}
       </p>

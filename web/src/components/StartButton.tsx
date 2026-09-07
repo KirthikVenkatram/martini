@@ -20,7 +20,7 @@ export function StartButton({ status }: { status: Status }) {
       type="button"
       onClick={handleClick}
       disabled={disabled}
-      className="rounded-sm bg-strip-day-ext px-5 py-2 font-narrow text-sm font-bold uppercase tracking-wide text-ink disabled:opacity-40"
+      className="rounded-sm bg-paper px-5 py-1.5 font-narrow text-sm font-bold uppercase tracking-wide text-ink disabled:opacity-40"
     >
       {status === "wrapped" ? "Replay day" : "Start"}
     </button>
