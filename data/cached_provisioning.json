@@ -1,10 +1,10 @@
 {
   "dashboard_uid": "martini-day-14",
   "dashboard_url": "https://copperpear1768.grafana.net/d/martini-day-14",
-  "alert_rule_uid": "cfxgtbc1xcvlsa",
-  "alert_rule_url": "https://copperpear1768.grafana.net/alerting/grafana/cfxgtbc1xcvlsa/view",
-  "burn_rate_threshold": 1.4,
+  "alert_rule_uid": "afxhrvgj9u680c",
+  "alert_rule_url": "https://copperpear1768.grafana.net/alerting/grafana/afxhrvgj9u680c/view",
+  "burn_rate_threshold": 1.35,
   "evaluation_window_minutes": 10,
-  "annotation": "We're moving too slowly and starting to eat into our overtime buffer, so let's look at simplifying the next setup.",
-  "provisioned_at": "2026-09-06T19:46:17.961787Z"
+  "annotation": "We're losing time faster than scheduled and risking overtime if we don't pick up the pace on these next setups.",
+  "provisioned_at": "2026-09-07T02:13:42.518190Z"
 }
