@@ -56,6 +56,46 @@ class SceneSnapshot(BaseModel):
     cast_names: list[str]
 
 
+class TimelineSnapshot(BaseModel):
+    """The day timeline (Module 6.3): call time to the overtime
+    threshold, as fractions of that domain so the component just places
+    marks -- it never does date math of its own. projected_wrap_fraction
+    is deliberately not clamped above 1.0 so the console can tell the
+    projected-wrap marker sits past the overtime line."""
+
+    call_label: str
+    overtime_label: str
+    elapsed_fraction: float
+    meal_fraction: float
+    golden_hour_fraction: float
+    projected_wrap_fraction: float
+    projected_wrap_label: str
+
+
+class PaceSnapshot(BaseModel):
+    """The pace line (Module 6.3): cumulative progress so far, as
+    (elapsed fraction of the scheduled day, completed fraction of total
+    pages) points. The "pace you needed" line needs no data of its own
+    -- normalized this way it's always the diagonal from (0, 0) to
+    (1, 1)."""
+
+    actual_points: list[tuple[float, float]]
+    behind_label: str | None = None
+
+
+class CastClockSnapshot(BaseModel):
+    """One performer's cast clock (Module 6.3). turnaround_fraction is
+    how much of the required rest-before-call minimum today's actual
+    rest used up, loaded from the same gate/rules/production_rules.yaml
+    the gate itself checks against -- so this always agrees with
+    whatever the gate later approves or rejects."""
+
+    character_name: str
+    hours_worked: float
+    turnaround_fraction: float
+    is_tight: bool
+
+
 class DaySnapshot(BaseModel):
     """Everything one SSE message tells the console. Sent in full on
     every push -- there is no partial-update variant to keep in sync."""
@@ -81,6 +121,9 @@ class DaySnapshot(BaseModel):
     burn_rate: float = 1.0
     projected_wrap: str | None = None
     recovery: RecoverySnapshot | None = None
+    timeline: TimelineSnapshot
+    pace: PaceSnapshot
+    cast_clocks: list[CastClockSnapshot]
 
     # Plain-English narration (Module 6.2) -- computed once in
     # server/narration.py so the console never has to turn a raw number

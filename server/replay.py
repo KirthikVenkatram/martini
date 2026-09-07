@@ -21,7 +21,7 @@ from agent.root import AT_RISK_ERROR_BUDGET_CONSUMED, run_recovery_cycle
 from emitter import schedule
 from emitter.models import ShootingDay
 from emitter.simulator import build_day, load_scenario, replay_day
-from server import narration
+from server import derived, narration
 from server.state import STATE, DaySnapshot, EventType, RecoverySnapshot, SceneSnapshot, Status
 
 
@@ -97,6 +97,9 @@ def _base_snapshot(
         scenes=scene_snapshots(day),
         shot_scene_numbers=shot_scene_numbers(day),
         recovery=recovery,
+        timeline=derived.timeline_snapshot(day, day.general_call),
+        pace=derived.pace_snapshot(day, day.general_call),
+        cast_clocks=derived.cast_clock_snapshots(day, day.general_call),
     )
 
 
@@ -140,6 +143,9 @@ def _tick_snapshot(day: ShootingDay, run_id: int, status: Status, event: dict) -
     snapshot.error_budget_consumed = schedule.error_budget_consumed(day, now)
     snapshot.burn_rate = schedule.burn_rate(day, now)
     snapshot.projected_wrap = schedule.projected_wrap(day, now).strftime("%H:%M")
+    snapshot.timeline = derived.timeline_snapshot(day, now)
+    snapshot.pace = derived.pace_snapshot(day, now)
+    snapshot.cast_clocks = derived.cast_clock_snapshots(day, now)
 
     for field, value in narration.tick_narration(
         day,

@@ -35,14 +35,14 @@ setups:
     actual_minutes: 23
     takes: 3
   42a:
-    actual_minutes: 36
-    takes: 6
+    actual_minutes: 40
+    takes: 7
   42b:
-    actual_minutes: 51
-    takes: 9
+    actual_minutes: 60
+    takes: 12
   42c:
-    actual_minutes: 62
-    takes: 13
+    actual_minutes: 77
+    takes: 17
   42Da:
     actual_minutes: 10
     takes: 2

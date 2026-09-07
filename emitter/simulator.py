@@ -33,13 +33,13 @@ PADDING_SCENE_NUMBER = "43"
 RECOVERY_SCENE_NUMBER = "42D"
 RECOVERY_SCENE_EIGHTHS = 5
 
-SCENE_EIGHTHS = {"1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "42": 4, "42B": 4, "42C": 2}
+SCENE_EIGHTHS = {"1": 4, "2": 4, "3": 4, "4": 4, "5": 2, "5B": 1, "5C": 1, "42": 4, "42B": 4, "42C": 2}
 SETUP_SCENES = {
     "1a": "1", "1b": "1",
     "2a": "2",
     "3a": "3", "3b": "3",
     "4a": "4",
-    "5a": "5", "5b": "5", "5c": "5",
+    "5a": "5", "5b": "5B", "5c": "5C",
     "42a": "42", "42b": "42B", "42c": "42C",
     "42Da": RECOVERY_SCENE_NUMBER,
 }
@@ -52,7 +52,11 @@ SETUP_SCENES = {
 # her 11-hour turnaround -- the gate rejection this demo is built
 # around. JUNO is a minor whose ordinary 09:00 call already sits close
 # to the 9-hour/19:00 wrap limit, so pushing her into an evening slot
-# breaches it.
+# breaches it. ELENA's and DESMOND's previous_night_wrap are set to give
+# them a comfortable turnaround margin (~76% of the required minimum
+# used) -- PRIYA is the only performer this day's cast clocks read as
+# tight against her limit, so the eventual rejection doesn't have to
+# compete with two other performers who already looked just as close.
 PRIYA = Performer(
     id="priya",
     name="Priya Osei",
@@ -76,7 +80,7 @@ ELENA = Performer(
     name="Elena Cho",
     character_name="ELENA",
     call_time=datetime(2026, 9, 3, 7, 30),
-    previous_night_wrap=datetime(2026, 9, 2, 20, 0),
+    previous_night_wrap=datetime(2026, 9, 2, 17, 0),
     minimum_turnaround_hours=11.0,
     is_minor=False,
 )
@@ -85,7 +89,7 @@ DESMOND = Performer(
     name="Desmond Ruiz",
     character_name="DESMOND",
     call_time=datetime(2026, 9, 3, 8, 0),
-    previous_night_wrap=datetime(2026, 9, 2, 20, 30),
+    previous_night_wrap=datetime(2026, 9, 2, 17, 30),
     minimum_turnaround_hours=11.0,
     is_minor=False,
 )
@@ -106,6 +110,8 @@ SCENE_CAST = {
     "3": ["elena", "juno"],
     "4": ["desmond", "juno"],
     "5": ["marcus", "elena", "desmond"],
+    "5B": ["marcus", "elena", "desmond"],
+    "5C": ["marcus", "elena", "desmond"],
     "42": ["elena", "desmond"],
     "42B": ["marcus", "juno"],
     "42C": ["elena"],
@@ -127,6 +133,8 @@ SCENE_CONTENT = {
     "3": ("ELENA waits with JUNO at the crossing, dodging her questions about last night.", "EXT", "DAY"),
     "4": ("DESMOND warns JUNO off the quarry road before the blasting crew arrives.", "EXT", "DAY"),
     "5": ("The three of them corner each other in the site office over the missing ledger.", "INT", "NIGHT"),
+    "5B": ("MARCUS slides the ledger across the desk and dares ELENA to explain the numbers.", "INT", "NIGHT"),
+    "5C": ("DESMOND admits the missing pages were his doing, not ELENA's.", "INT", "NIGHT"),
     "42": ("ELENA and DESMOND finally say what's been unsaid at the reservoir's edge.", "EXT", "NIGHT"),
     "42B": ("MARCUS drives JUNO home in silence, the radio the only thing talking.", "INT", "NIGHT"),
     "42C": ("ELENA walks the reservoir path alone, turning the night over in her head.", "EXT", "NIGHT"),

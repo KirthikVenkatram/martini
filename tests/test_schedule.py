@@ -13,7 +13,6 @@ from emitter.schedule import (
     error_budget_total,
     meal_penalty_due,
     minutes_to_golden_hour,
-    projected_recovery,
     projected_wrap,
     turnaround_violation,
 )
@@ -238,6 +237,20 @@ def test_error_budget_consumed_is_zero_ahead_of_schedule_with_positive_remaining
     assert error_budget_remaining(day, now) > timedelta()
 
 
+def test_error_budget_consumed_reports_zero_before_min_progress_even_with_a_wild_early_pace():
+    # A single very slow early scene, on its own, would extrapolate to a
+    # wrap hours late -- but with only ~2% of the day's pages done, that
+    # sample is far too small to trust. Below MIN_PROGRESS_FOR_HIGH_WATER
+    # this must report 0.0 rather than that noisy instantaneous reading,
+    # so one unlucky early scene can't clamp the budget straight to
+    # "fully spent" before there's any real evidence (this used to trip
+    # the slipping scenario's at-risk alert on Scene 1, not Scene 42 --
+    # see test_slipping_scenario_does_not_trigger_at_risk_before_scene_42).
+    day = _make_day_with_progress(completed_eighths=1, total_eighths=52)
+    now = day.general_call + timedelta(hours=2)
+    assert error_budget_consumed(day, now) == pytest.approx(0.0)
+
+
 def _make_windowed_day(scene_a_eighths: int, scene_a_minutes: int | None, total_eighths: int = 66) -> ShootingDay:
     scene_a = Scene(
         number="A",
@@ -432,7 +445,7 @@ _DAY_14_SETUP_SCENES = {
 _DAY_14_PADDING_SCENE_EIGHTHS = _DAY_14_TOTAL_EIGHTHS - sum(_DAY_14_SCENE_EIGHTHS.values())  # 22
 
 _DAY_14_HOUR_BEFORE_SCENE_42 = timedelta(minutes=259)  # Scene 5 has just wrapped
-_DAY_14_END_OF_SCENE_42 = timedelta(minutes=259 + 36 + 51 + 62)  # 42c has just wrapped
+_DAY_14_END_OF_SCENE_42 = timedelta(minutes=259 + 40 + 60 + 77)  # 42c has just wrapped
 
 _RECOVERY_SCENE_NUMBER = "42D"  # a quick insert pickup shot right after Scene 42C
 _RECOVERY_SCENE_EIGHTHS = 5
@@ -551,7 +564,7 @@ def test_slipping_scenario_burn_rate_spikes_during_scene_42():
 def test_slipping_scenario_consumed_is_meaningfully_high_by_end_of_scene_42():
     day = _make_slipping_day()
     now = day.general_call + _DAY_14_END_OF_SCENE_42
-    assert 0.75 <= error_budget_consumed(day, now) <= 0.85
+    assert error_budget_consumed(day, now) == pytest.approx(1.0)
 
 
 def test_slipping_scenario_burn_rate_recovers_but_consumed_holds_its_high_water_mark():
@@ -559,11 +572,12 @@ def test_slipping_scenario_burn_rate_recovers_but_consumed_holds_its_high_water_
     # (Scene 42D) immediately pulls it back under 1.0. error_budget_consumed
     # is a high-water mark — a schedule slip is spent time, and that
     # slack doesn't come back just because the crew sped up afterward.
-    # The recovery instead shows up in projected_recovery: the current
-    # forecast improves (projects earlier than the worst-case wrap that
-    # set the high-water mark), even though the budget already spent
-    # stays spent. That's the real independence: a fast window improves
-    # the rate and the forecast, but never refunds the budget.
+    # The recovery instead shows up in projected_wrap: the current
+    # forecast improves (projects meaningfully earlier than the
+    # worst-case wrap that set the high-water mark), even though the
+    # budget already spent stays spent. That's the real independence: a
+    # fast window improves the rate and the forecast, but never refunds
+    # the budget.
     before = _make_slipping_day(include_recovery_scene=True)
     after = _make_slipping_day(include_recovery_scene=True, shoot_recovery_pickup=True)
 
@@ -572,9 +586,13 @@ def test_slipping_scenario_burn_rate_recovers_but_consumed_holds_its_high_water_
 
     assert burn_rate(before, now_before) > 2.0
     assert burn_rate(after, now_after) < 1.0
-    assert 0.75 <= error_budget_consumed(before, now_before) <= 0.85
+    assert error_budget_consumed(before, now_before) == pytest.approx(1.0)
     assert error_budget_consumed(after, now_after) == pytest.approx(error_budget_consumed(before, now_before))
-    assert projected_recovery(after, now_after) > timedelta()
+    # The day is now so far behind that one quick pickup doesn't project
+    # a wrap ahead of the *original* schedule -- but it does project
+    # something well earlier than the worst-case wrap that set the high
+    # water mark, which is the recovery this function actually promises.
+    assert projected_wrap(after, now_after) < projected_wrap(before, now_before) - timedelta(hours=1)
 
 
 def test_error_budget_consumed_is_monotonically_non_decreasing_across_slipping_scenario():
@@ -584,3 +602,34 @@ def test_error_budget_consumed_is_monotonically_non_decreasing_across_slipping_s
     values = [error_budget_consumed(day, day.general_call + elapsed) for elapsed in sample_points]
 
     assert values == sorted(values)
+
+
+def test_slipping_scenario_does_not_trigger_at_risk_before_scene_42():
+    """Regression test for the early-instability bug fixed above.
+
+    Every other slipping-scenario test in this file evaluates
+    error_budget_consumed against a fully-shot `day`, which always
+    clears MIN_PROGRESS_FOR_HIGH_WATER regardless of which `now` is
+    queried. That never exercises the early-return branch the live
+    replay actually hits every run, incrementally, before enough of the
+    day is shot to trust a reading. This walks the real scenario the
+    way server/replay.py does -- `day` only as complete as `now` -- and
+    asserts the agent's at-risk alert fires because Scene 42 collapses,
+    not because Scene 1's own noisy pace clamped the budget to "spent"
+    within the first hour.
+    """
+    from agent.root import AT_RISK_ERROR_BUDGET_CONSUMED
+    from emitter.simulator import build_day, load_scenario, replay_day
+
+    day = build_day("slipping")
+    scenario = load_scenario("slipping")
+    triggered_at: list[str | None] = []
+
+    def on_event(event: dict) -> None:
+        if not triggered_at and error_budget_consumed(day, event["now"]) >= AT_RISK_ERROR_BUDGET_CONSUMED:
+            triggered_at.append(event.get("scene"))
+
+    replay_day(day, scenario, speed_factor=1_000_000, on_event=on_event, dry_run=True)
+
+    assert triggered_at, "the day should still go at risk once Scene 42 collapses"
+    assert triggered_at[0] in ("42", "42B", "42C")

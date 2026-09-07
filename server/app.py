@@ -23,7 +23,7 @@ load_dotenv()
 
 from agent.subagents.planner import provision  # noqa: E402 -- after load_dotenv()
 from emitter.simulator import build_day  # noqa: E402
-from server import narration  # noqa: E402
+from server import derived, narration  # noqa: E402
 from server.provisioning_cache import load_cached_provisioning, save_cached_provisioning  # noqa: E402
 from server.replay import scene_snapshots, start_replay  # noqa: E402
 from server.state import DEFAULT_SCENARIO, STATE, DaySnapshot, ProvisioningSnapshot  # noqa: E402
@@ -83,6 +83,9 @@ def _initial_snapshot() -> DaySnapshot:
         pages_remaining_eighths=day.total_page_eighths.eighths,
         total_page_eighths=day.total_page_eighths.eighths,
         setups_total=day.total_setups,
+        timeline=derived.timeline_snapshot(day, day.general_call),
+        pace=derived.pace_snapshot(day, day.general_call),
+        cast_clocks=derived.cast_clock_snapshots(day, day.general_call),
         **narration.idle_narration(day),
     )
 

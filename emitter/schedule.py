@@ -13,8 +13,11 @@ single slightly-slow scene can project a wrap far past the overtime
 threshold on almost no evidence. Since the high-water mark never comes
 back down, letting an unstable early reading into it would pin
 consumed near 1.0 for the rest of the day on noise, not a real slip.
-Below this threshold, error_budget_consumed reports the plain
-instantaneous reading instead of ratcheting."""
+Below this threshold, error_budget_consumed reports 0.0 rather than
+the instantaneous reading -- with this little evidence, a single
+scene's own pace can swing wildly (one slow early scene, on its own,
+can extrapolate to a wrap hours late), and that noise would otherwise
+reach the console directly, not just the ratcheted history."""
 
 
 def _scene_wrap_elapsed(day: ShootingDay) -> dict[str, timedelta]:
@@ -60,6 +63,12 @@ def _eighths_wrapped_in_window(
     return total
 
 
+def required_page_eighths_rate(day: ShootingDay) -> float:
+    """Page eighths per minute the day must average to wrap on scheduled_wrap."""
+    total_scheduled_minutes = (day.scheduled_wrap - day.general_call).total_seconds() / 60
+    return day.total_page_eighths.eighths / total_scheduled_minutes
+
+
 def burn_rate(day: ShootingDay, now: datetime, window_minutes: int = 60) -> float:
     """Pace over the trailing window, not the whole day.
 
@@ -81,9 +90,7 @@ def burn_rate(day: ShootingDay, now: datetime, window_minutes: int = 60) -> floa
     this returns 1.0 (no history yet to call it anything else).
     """
     window = timedelta(minutes=window_minutes)
-    total_scheduled_minutes = (day.scheduled_wrap - day.general_call).total_seconds() / 60
-    required_rate = day.total_page_eighths.eighths / total_scheduled_minutes
-    required_in_window = required_rate * window_minutes
+    required_in_window = required_page_eighths_rate(day) * window_minutes
 
     window_end = now - day.general_call
     while window_end > timedelta():
@@ -140,15 +147,23 @@ def schedule_slippage(day: ShootingDay, now: datetime) -> timedelta:
 
 def _completed_eighths_trace(day: ShootingDay) -> list[tuple[timedelta, int]]:
     """(elapsed since general_call, cumulative completed page eighths) at each scene wrap, in order."""
+    return [(elapsed, cumulative) for _, elapsed, cumulative in scene_wrap_trace(day)]
+
+
+def scene_wrap_trace(day: ShootingDay) -> list[tuple[str, timedelta, int]]:
+    """(scene number, elapsed since general_call, cumulative completed page
+    eighths) at each scene wrap, in order. Public counterpart to
+    _completed_eighths_trace for callers (e.g. the console's pace-line
+    visual) that also need which scene each point belongs to."""
     wrap_elapsed = _scene_wrap_elapsed(day)
     eighths_by_scene = {scene.number: scene.page_eighths.eighths for scene in day.scenes}
     ordered = sorted(wrap_elapsed.items(), key=lambda item: item[1])
 
-    trace: list[tuple[timedelta, int]] = []
+    trace: list[tuple[str, timedelta, int]] = []
     cumulative = 0
     for scene_number, elapsed in ordered:
         cumulative += eighths_by_scene[scene_number]
-        trace.append((elapsed, cumulative))
+        trace.append((scene_number, elapsed, cumulative))
     return trace
 
 
@@ -174,15 +189,17 @@ def error_budget_consumed(day: ShootingDay, now: datetime) -> float:
     Readings from before MIN_PROGRESS_FOR_HIGH_WATER of the day's pages
     were done are excluded from that history — too little evidence to
     trust ratcheting on. If now itself falls below that threshold,
-    there's no trustworthy history to ratchet at all, so this just
-    reports the plain instantaneous reading at now.
+    there's no trustworthy history to ratchet at all *or* to report
+    directly — the instantaneous reading at now is exactly as noisy as
+    the excluded history would be, so this reports 0.0 instead of
+    passing that noise straight through.
     """
     total = day.total_page_eighths.eighths
     elapsed_now = now - day.general_call
     now_completed = day.completed_page_eighths.eighths
 
     if not total or now_completed / total < MIN_PROGRESS_FOR_HIGH_WATER:
-        return _instantaneous_consumed(day, elapsed_now, now_completed)
+        return 0.0
 
     candidates = [
         _instantaneous_consumed(day, elapsed, completed)

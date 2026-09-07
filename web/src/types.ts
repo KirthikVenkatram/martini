@@ -68,6 +68,28 @@ export interface SceneSnapshot {
   cast_names: string[];
 }
 
+export interface TimelineSnapshot {
+  call_label: string;
+  overtime_label: string;
+  elapsed_fraction: number;
+  meal_fraction: number;
+  golden_hour_fraction: number;
+  projected_wrap_fraction: number;
+  projected_wrap_label: string;
+}
+
+export interface PaceSnapshot {
+  actual_points: [number, number][];
+  behind_label: string | null;
+}
+
+export interface CastClockSnapshot {
+  character_name: string;
+  hours_worked: number;
+  turnaround_fraction: number;
+  is_tight: boolean;
+}
+
 export interface DaySnapshot {
   run_id: number;
   event_type: EventType;
@@ -90,6 +112,9 @@ export interface DaySnapshot {
   burn_rate: number;
   projected_wrap: string | null;
   recovery: RecoverySnapshot | null;
+  timeline: TimelineSnapshot;
+  pace: PaceSnapshot;
+  cast_clocks: CastClockSnapshot[];
   verdict_headline: string;
   verdict_subline: string;
   budget_sentence: string;

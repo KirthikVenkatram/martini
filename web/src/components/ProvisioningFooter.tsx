@@ -13,7 +13,7 @@ export function ProvisioningFooter({
 }) {
   if (!provisioning) {
     return (
-      <div className="border-t border-paper/10 px-4 py-2 font-body text-[11px] text-paper/40">
+      <div className="border-t border-paper/10 px-4 py-1.5 font-body text-[11px] text-paper/40">
         Monitoring unavailable — no live Grafana connection and no cached run on record.
       </div>
     );
@@ -22,7 +22,7 @@ export function ProvisioningFooter({
   const { info, live } = provisioning;
 
   return (
-    <div className="border-t border-paper/10 px-4 py-2 font-body text-[11px] leading-relaxed text-paper/45">
+    <div className="border-t border-paper/10 px-4 py-1.5 font-body text-[11px] leading-relaxed text-paper/45">
       <span>Monitoring set up by MARTINI at call — </span>
       <a
         className="underline decoration-paper/30 hover:decoration-paper/60"

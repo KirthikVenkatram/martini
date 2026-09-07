@@ -11,7 +11,18 @@ from __future__ import annotations
 
 from emitter.simulator import build_day
 from server.replay import _carry_forward_snapshot, incident_url, scene_snapshots, shot_scene_numbers
-from server.state import STATE, DaySnapshot
+from server.state import STATE, DaySnapshot, PaceSnapshot, TimelineSnapshot
+
+_TIMELINE = TimelineSnapshot(
+    call_label="07:00",
+    overtime_label="19:00",
+    elapsed_fraction=0.5,
+    meal_fraction=0.5,
+    golden_hour_fraction=0.95,
+    projected_wrap_fraction=0.9,
+    projected_wrap_label="Projected wrap 18:00",
+)
+_PACE = PaceSnapshot(actual_points=[(0.0, 0.0)])
 
 
 def test_scene_snapshots_are_in_shooting_order_with_cast_names():
@@ -85,6 +96,9 @@ def test_carry_forward_snapshot_preserves_progress_fields_from_the_last_tick(mon
         error_budget_consumed=0.62,
         burn_rate=1.4,
         projected_wrap="19:40",
+        timeline=_TIMELINE,
+        pace=_PACE,
+        cast_clocks=[],
     )
     monkeypatch.setattr(STATE, "last_snapshot", last_tick)
 
@@ -110,6 +124,9 @@ def test_carry_forward_snapshot_falls_back_to_zeroed_defaults_for_a_stale_run_id
         scenes=[],
         clock="14:02",
         error_budget_consumed=0.62,
+        timeline=_TIMELINE,
+        pace=_PACE,
+        cast_clocks=[],
     )
     monkeypatch.setattr(STATE, "last_snapshot", stale_tick)
 

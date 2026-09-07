@@ -7,13 +7,16 @@ const STRIP_CLASS: Record<StripColor, string> = {
   "night-ext": "bg-strip-night-ext text-ink",
 };
 
+const SHOT_WINDOW = 1;
+const TO_GO_WINDOW = 2;
+
 type StripState = "shot" | "current" | "remaining";
 
 function Strip({ scene, state }: { scene: SceneSnapshot; state: StripState }) {
   return (
     <li
       className={[
-        "flex items-center gap-2 rounded-[2px] px-2.5 py-1 font-narrow",
+        "flex items-center gap-1.5 rounded-[2px] px-2 py-0.5 font-narrow leading-tight",
         STRIP_CLASS[scene.strip_color],
         state === "shot" ? "opacity-40" : "opacity-100",
         state === "current" ? "strip-current ring-2 ring-paper" : "",
@@ -32,12 +35,25 @@ function Strip({ scene, state }: { scene: SceneSnapshot; state: StripState }) {
 
 function SectionLabel({ label }: { label: string }) {
   return (
-    <p className="mb-1 mt-2.5 px-0.5 font-narrow text-[10px] uppercase tracking-widest text-paper/40 first:mt-0">
+    <p className="mb-0.5 mt-1.5 px-0.5 font-narrow text-[10px] uppercase tracking-widest text-paper/40 first:mt-0">
       {label}
     </p>
   );
 }
 
+function MoreCount({ count, label }: { count: number; label: string }) {
+  if (count <= 0) return null;
+  return (
+    <p className="px-2 py-px font-narrow text-[10px] uppercase tracking-wide text-paper/35">
+      +{count} more {label}
+    </p>
+  );
+}
+
+/** A window around the current scene, not every scene -- the strip
+ * board is the single biggest thing on the page, and at the at-risk
+ * moment the rejection card below it matters far more than seeing all
+ * twelve strips at once. */
 export function StripBoard({
   scenes,
   currentScene,
@@ -51,24 +67,34 @@ export function StripBoard({
   const shotList = scenes.filter((scene) => shot.has(scene.number));
   const toGoList = scenes.filter((scene) => !shot.has(scene.number));
 
+  const shotHiddenCount = Math.max(0, shotList.length - SHOT_WINDOW);
+  const visibleShot = shotList.slice(-SHOT_WINDOW);
+
+  const currentIndex = currentScene ? toGoList.findIndex((s) => s.number === currentScene) : -1;
+  const toGoStart = currentIndex >= 0 ? currentIndex : 0;
+  const visibleToGo = toGoList.slice(toGoStart, toGoStart + TO_GO_WINDOW);
+  const toGoHiddenCount = toGoList.length - toGoStart - visibleToGo.length;
+
   return (
-    <section aria-label="Strip board" className="px-4 py-3">
-      {shotList.length > 0 && (
+    <section aria-label="Strip board" className="px-4 py-1">
+      {visibleShot.length > 0 && (
         <>
           <SectionLabel label="Shot" />
-          <ul className="flex flex-col gap-0.5">
-            {shotList.map((scene) => (
+          <MoreCount count={shotHiddenCount} label="shot" />
+          <ul className="flex flex-col gap-px">
+            {visibleShot.map((scene) => (
               <Strip key={scene.number} scene={scene} state="shot" />
             ))}
           </ul>
         </>
       )}
       <SectionLabel label="To go" />
-      <ul className="flex flex-col gap-0.5">
-        {toGoList.map((scene) => (
+      <ul className="flex flex-col gap-px">
+        {visibleToGo.map((scene) => (
           <Strip key={scene.number} scene={scene} state={scene.number === currentScene ? "current" : "remaining"} />
         ))}
       </ul>
+      <MoreCount count={toGoHiddenCount} label="to go" />
     </section>
   );
 }

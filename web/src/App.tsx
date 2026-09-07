@@ -1,5 +1,8 @@
+import { CastClocks } from "./components/CastClocks";
+import { DayTimeline } from "./components/DayTimeline";
 import { ErrorBudgetBar } from "./components/ErrorBudgetBar";
 import { Header } from "./components/Header";
+import { PaceLine } from "./components/PaceLine";
 import { ProvisioningFooter } from "./components/ProvisioningFooter";
 import { RecoveryOptions } from "./components/RecoveryOptions";
 import { StartButton } from "./components/StartButton";
@@ -24,8 +27,10 @@ export default function App() {
         <Header snapshot={snapshot} />
         <Verdict snapshot={snapshot} />
         <ErrorBudgetBar snapshot={snapshot} />
+        <DayTimeline timeline={snapshot.timeline} />
+        <PaceLine pace={snapshot.pace} />
       </div>
-      <div className="flex justify-center px-4 py-2">
+      <div className="flex justify-center px-4 py-0.5">
         <StartButton status={snapshot.status} />
       </div>
       {snapshot.error_message && (
@@ -36,8 +41,9 @@ export default function App() {
         currentScene={snapshot.current_scene}
         shotScenes={snapshot.shot_scene_numbers}
       />
+      <CastClocks clocks={snapshot.cast_clocks} />
       {snapshot.recovery && (
-        <div className="mt-2 border-t border-paper/10 pt-1">
+        <div className="mt-0.5 border-t border-paper/10 pt-0.5">
           <RecoveryOptions recovery={snapshot.recovery} />
         </div>
       )}
