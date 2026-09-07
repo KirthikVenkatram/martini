@@ -85,6 +85,8 @@ def test_initial_snapshot_reports_idle_with_the_default_scenario_plan():
     assert snapshot.total_page_eighths > 0
     # At idle, "remaining" is the whole day's pages -- nothing shot yet.
     assert snapshot.pages_remaining_eighths == snapshot.total_page_eighths
+    assert snapshot.verdict_headline == "STANDING BY FOR CALL"
+    assert snapshot.cost_of_delay_sentence  # narration is wired, not left blank
 
 
 def test_initial_snapshot_falls_back_to_provisioning_state():

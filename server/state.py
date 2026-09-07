@@ -82,6 +82,18 @@ class DaySnapshot(BaseModel):
     projected_wrap: str | None = None
     recovery: RecoverySnapshot | None = None
 
+    # Plain-English narration (Module 6.2) -- computed once in
+    # server/narration.py so the console never has to turn a raw number
+    # into a sentence itself. The number still travels on the fields
+    # above for anything that wants to render it directly (the budget
+    # bar's width); these are what an AD actually reads.
+    verdict_headline: str = ""
+    verdict_subline: str = ""
+    budget_sentence: str = ""
+    burn_sentence: str = ""
+    pages_sentence: str = ""
+    cost_of_delay_sentence: str = ""
+
 
 class AppState:
     """Guards everything the replay thread and the API handlers share."""
