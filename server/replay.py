@@ -18,10 +18,12 @@ from datetime import datetime
 
 from agent.config import GRAFANA_URL
 from agent.root import AT_RISK_ERROR_BUDGET_CONSUMED, run_recovery_cycle
+from agent.tools.scheduling import generate_scenario
 from emitter import schedule
 from emitter.models import ShootingDay
 from emitter.simulator import build_day, load_scenario, replay_day
 from server import derived, narration
+from server.projects import storage as projects_storage
 from server.state import STATE, DaySnapshot, EventType, RecoverySnapshot, SceneSnapshot, Status
 
 
@@ -187,12 +189,28 @@ def _trigger_recovery_if_at_risk(day: ShootingDay, run_id: int, now: datetime) -
     STATE.publish(_carry_forward_snapshot(day, run_id, "at_risk", "recovery"))
 
 
+def _active_day_and_scenario(scenario_name: str) -> tuple[ShootingDay, dict[str, dict]]:
+    """The day + replay timing run_replay should use this run.
+
+    Falls back to the named built-in scenario (unchanged behavior) when
+    no project has been activated. When one has, its own day.json and a
+    freshly-generated scenario (Module 7) are used instead -- the
+    nominal/slipping toggle is ignored, since the console never exposes
+    it anyway.
+    """
+    if STATE.active_project_slug is not None:
+        day = projects_storage.load_day(STATE.active_project_slug)
+        if day is not None:
+            return day, generate_scenario(day).scenario
+
+    return build_day(scenario_name), load_scenario(scenario_name)
+
+
 def run_replay(scenario_name: str, run_id: int) -> None:
     """The background thread body for one Start click. Owns `day` exclusively."""
-    day = build_day(scenario_name)
+    day, scenario = _active_day_and_scenario(scenario_name)
     with STATE.lock:
         STATE.plan_day = day
-    scenario = load_scenario(scenario_name)
 
     def on_event(event: dict) -> None:
         if not STATE.is_current(run_id):

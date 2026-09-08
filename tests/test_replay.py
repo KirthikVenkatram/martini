@@ -134,3 +134,35 @@ def test_carry_forward_snapshot_falls_back_to_zeroed_defaults_for_a_stale_run_id
 
     assert snapshot.clock is None
     assert snapshot.error_budget_consumed == 0.0
+
+
+def test_active_day_and_scenario_falls_back_to_the_named_scenario_when_no_project_is_active(monkeypatch):
+    from server import replay as replay_module
+
+    with STATE.lock:
+        STATE.active_project_slug = None
+
+    day, scenario = replay_module._active_day_and_scenario("nominal")
+
+    assert day.day_number == 14
+    assert "1a" in scenario
+
+
+def test_active_day_and_scenario_loads_the_active_project(monkeypatch):
+    from server import replay as replay_module
+    from server.projects import storage as storage_module
+
+    fake_day = build_day("nominal")
+
+    with STATE.lock:
+        STATE.active_project_slug = "the-quarry"
+
+    monkeypatch.setattr(storage_module, "load_day", lambda slug: fake_day if slug == "the-quarry" else None)
+
+    day, scenario = replay_module._active_day_and_scenario("nominal")
+
+    assert day is fake_day
+    assert set(scenario.keys()) == {s.id for s in fake_day.setups}
+
+    with STATE.lock:
+        STATE.active_project_slug = None
