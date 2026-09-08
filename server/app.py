@@ -114,6 +114,11 @@ async def stream(request: Request) -> StreamingResponse:
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
+@app.get("/health")
+async def health() -> JSONResponse:
+    return JSONResponse({"status": "ok"})
+
+
 @app.post("/api/day/start")
 async def start_day(scenario: str = DEFAULT_SCENARIO) -> JSONResponse:
     if scenario not in _VALID_SCENARIOS:
