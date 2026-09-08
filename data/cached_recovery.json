@@ -1,0 +1,61 @@
+{
+  "observation": {
+    "error_budget_consumed": 1.0,
+    "burn_rate": 0.6753246753246752,
+    "pages_completed_eighths": 35,
+    "pages_remaining_eighths": 17,
+    "setups_completed": 13,
+    "setups_total": 13,
+    "projected_wrap_offset_minutes": 47.2,
+    "minutes_to_golden_hour": 214,
+    "firing_alerts": [],
+    "observed_at": "2024-07-26T17:38:15Z"
+  },
+  "options": [
+    {
+      "id": "move_sc43_to_pickups",
+      "kind": "move_to_pickups",
+      "description": "Moving the entire Sc.43 (PRIYA returns to the quarry gate and tells MARCUS she's selling her share) to a pickup day. This is the most direct way to eliminate the 47-minute projected wrap offset and prevent further delays, especially considering the crew's current burn rate. While Sc.43 is an important emotional beat, handling it when the crew is fresh on a dedicated pickup day will ensure its quality and prevent rushing at the end of an already challenging day. This option means PRIYA, whose only scene today is Sc.43, will no longer be required on set today.",
+      "affected_scenes": [
+        "Sc.43"
+      ],
+      "minutes_recovered": 137,
+      "proposed_call_times": {
+        "priya": "2026-09-03T23:00:00"
+      }
+    },
+    {
+      "id": "drop_coverage_sc43",
+      "kind": "drop_coverage",
+      "description": "To make up time and wrap closer to schedule, drop significant coverage on Sc.43. Focus on securing a strong wide master shot that captures PRIYA and MARCUS at the quarry gate, ensuring the crucial dialogue about selling her share is clearly delivered. Limit additional coverage to perhaps one essential medium shot for each character to maintain emotional connection, but eliminate all other close-ups, inserts, and additional setups. This approach allows the scene to be completed today, preserving its narrative impact without incurring the full time penalty of extensive setup changes, which are exacerbated by the current burn rate and the pressure of the day.",
+      "affected_scenes": [
+        "Sc.43"
+      ],
+      "minutes_recovered": 45,
+      "proposed_call_times": null
+    }
+  ],
+  "verdicts": [
+    {
+      "option_id": "move_sc43_to_pickups",
+      "approved": false,
+      "violations": [
+        {
+          "rule": "meal",
+          "performer_id": null,
+          "shortfall": "PT10H",
+          "reason": "Runs the crew past their meal window -- lunch is due by 13:00 and this option still has people working at 23:00."
+        }
+      ],
+      "projected_recovery": "PT2H17M"
+    },
+    {
+      "option_id": "drop_coverage_sc43",
+      "approved": true,
+      "violations": [],
+      "projected_recovery": "PT45M"
+    }
+  ],
+  "incident_id": "annotation:12",
+  "live": true
+}
