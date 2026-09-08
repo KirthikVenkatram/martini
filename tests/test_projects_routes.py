@@ -109,6 +109,23 @@ def test_upload_script_surfaces_a_quota_error_plainly(client, monkeypatch):
     assert "quota" in response.json()["detail"].lower()
 
 
+def test_upload_script_surfaces_a_parse_error_plainly(client, monkeypatch):
+    created = client.post("/api/projects", json={"title": "The Quarry", "total_days": 1, "crew_size": 1}).json()
+    slug = created["slug"]
+
+    from agent.tools.breakdown import BreakdownParseError
+
+    def _raise_parse_error(pdf_bytes: bytes) -> list[Scene]:
+        raise BreakdownParseError("scene at index 0 failed to parse: 'page_eighths'")
+
+    monkeypatch.setattr("server.routes.projects.breakdown_script", _raise_parse_error)
+
+    response = client.post(f"/api/projects/{slug}/script", files={"file": ("script.pdf", b"%PDF-1", "application/pdf")})
+
+    assert response.status_code == 422
+    assert "page_eighths" in response.json()["detail"]
+
+
 def test_save_cast_then_build_day(client):
     created = client.post("/api/projects", json={"title": "The Quarry", "total_days": 1, "crew_size": 1}).json()
     slug = created["slug"]
