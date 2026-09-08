@@ -59,10 +59,20 @@ def parse_monitoring_plan(raw_text: str) -> MonitoringPlan:
 
     Raised errors name what was wrong (invalid JSON vs. a schema
     mismatch) so a malformed model reply is diagnosable, not a bare
-    traceback.
+    traceback. Strips a markdown code fence first -- Gemini sometimes
+    wraps its JSON reply in ```json ... ``` despite the prompt asking
+    for strict JSON, the same defensive step agent/tools/breakdown.py
+    already takes for its own JSON reply.
     """
+    text = raw_text.strip()
+    if text.startswith("```"):
+        text = text.strip("`")
+        if "\n" in text:
+            first_line, rest = text.split("\n", 1)
+            text = rest if first_line.strip().lower() in ("json", "") else text
+
     try:
-        payload = json.loads(raw_text)
+        payload = json.loads(text)
     except json.JSONDecodeError as exc:
         raise ValueError(f"planner did not return valid JSON: {raw_text!r}") from exc
 

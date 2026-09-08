@@ -217,6 +217,16 @@ def test_parse_monitoring_plan_rejects_non_json_text():
         parse_monitoring_plan("the burn rate looks fine to me")
 
 
+def test_parse_monitoring_plan_strips_markdown_code_fences():
+    from agent.subagents.planner import parse_monitoring_plan
+
+    raw = '```json\n{"burn_rate_threshold": 1.4, "evaluation_window_minutes": 10, "annotation": "Losing time."}\n```'
+
+    plan = parse_monitoring_plan(raw)
+
+    assert plan.burn_rate_threshold == 1.4
+
+
 def test_provision_with_plan_skips_the_decision_call(monkeypatch):
     from agent.subagents import planner as planner_module
 
