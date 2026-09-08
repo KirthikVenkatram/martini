@@ -146,6 +146,8 @@ class AppState:
         self.run_id = 0
         self.status: Status = "idle"
         self.plan_day: ShootingDay = build_day(DEFAULT_SCENARIO)
+        self.active_project_slug: str | None = None
+        self.active_total_days: int = TOTAL_SHOOT_DAYS
         self.provisioning: ProvisioningSnapshot | None = None
         self.recovery: RecoverySnapshot | None = None
         self.recovery_triggered_for_run_id: int | None = None

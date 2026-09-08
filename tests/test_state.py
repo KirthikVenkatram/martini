@@ -8,7 +8,7 @@ the same run.
 
 from __future__ import annotations
 
-from server.state import AppState, DaySnapshot, PaceSnapshot, TimelineSnapshot
+from server.state import TOTAL_SHOOT_DAYS, AppState, DaySnapshot, PaceSnapshot, TimelineSnapshot
 
 _TIMELINE = TimelineSnapshot(
     call_label="07:00",
@@ -90,3 +90,10 @@ def test_unsubscribe_stops_delivery():
     )
 
     assert q.empty()
+
+
+def test_active_project_defaults_to_none_and_day_14_total_days():
+    state = AppState()
+
+    assert state.active_project_slug is None
+    assert state.active_total_days == TOTAL_SHOOT_DAYS
