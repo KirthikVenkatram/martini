@@ -215,3 +215,31 @@ def test_parse_monitoring_plan_rejects_non_json_text():
 
     with pytest.raises(ValueError, match="valid JSON"):
         parse_monitoring_plan("the burn rate looks fine to me")
+
+
+def test_provision_with_plan_skips_the_decision_call(monkeypatch):
+    from agent.subagents import planner as planner_module
+
+    async def _fail_if_called(day):
+        raise AssertionError("decide_monitoring_plan should not be called by provision_with_plan")
+
+    monkeypatch.setattr(planner_module, "decide_monitoring_plan", _fail_if_called)
+
+    async def _fake_dashboard(day):
+        return "dash-uid"
+
+    async def _fake_alert(day, threshold, window, annotation):
+        return "alert-uid"
+
+    monkeypatch.setattr(planner_module, "provision_day_dashboard", _fake_dashboard)
+    monkeypatch.setattr(planner_module, "provision_burn_rate_alert", _fake_alert)
+
+    plan = planner_module.MonitoringPlan(
+        burn_rate_threshold=1.5, evaluation_window_minutes=10, annotation="Losing time."
+    )
+
+    result = asyncio.run(planner_module.provision_with_plan(DAY, plan))
+
+    assert result.dashboard_uid == "dash-uid"
+    assert result.alert_rule_uid == "alert-uid"
+    assert result.burn_rate_threshold == 1.5

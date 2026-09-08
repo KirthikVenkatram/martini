@@ -85,7 +85,7 @@ def _day_summary(day: ShootingDay) -> str:
     )
 
 
-async def _decide_monitoring_plan(day: ShootingDay) -> MonitoringPlan:
+async def decide_monitoring_plan(day: ShootingDay) -> MonitoringPlan:
     """Runs the planner agent for one turn to get its monitoring decision."""
     agent = _build_planner_agent()
     runner = InMemoryRunner(agent=agent, app_name="martini-planner")
@@ -107,10 +107,14 @@ async def _decide_monitoring_plan(day: ShootingDay) -> MonitoringPlan:
     return parse_monitoring_plan(raw_text)
 
 
-async def provision(day: ShootingDay) -> ProvisioningResult:
-    """Provisions Grafana for one shooting day: dashboard, then burn-rate alert."""
-    plan = await _decide_monitoring_plan(day)
+async def provision_with_plan(day: ShootingDay, plan: MonitoringPlan) -> ProvisioningResult:
+    """Provisions Grafana for one shooting day from an already-decided plan.
 
+    Skips the Gemini call entirely -- used when a project's monitoring
+    plan was already decided and cached on an earlier activation
+    (Module 7), so re-provisioning on a later activation costs a
+    Grafana MCP round trip but not another Gemini request.
+    """
     dashboard_uid = await provision_day_dashboard(day)
     alert_rule_uid = await provision_burn_rate_alert(
         day, plan.burn_rate_threshold, plan.evaluation_window_minutes, plan.annotation
@@ -126,3 +130,9 @@ async def provision(day: ShootingDay) -> ProvisioningResult:
         annotation=plan.annotation,
         provisioned_at=datetime.now(timezone.utc),
     )
+
+
+async def provision(day: ShootingDay) -> ProvisioningResult:
+    """Provisions Grafana for one shooting day: decide, then dashboard, then burn-rate alert."""
+    plan = await decide_monitoring_plan(day)
+    return await provision_with_plan(day, plan)
