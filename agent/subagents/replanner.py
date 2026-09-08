@@ -48,8 +48,15 @@ def parse_recovery_options(raw_text: str) -> list[RecoveryOption]:
     or the wrong option count) so a malformed model reply is
     diagnosable, not a bare traceback.
     """
+    text = raw_text.strip()
+    if text.startswith("```"):
+        text = text.strip("`")
+        if "\n" in text:
+            first_line, rest = text.split("\n", 1)
+            text = rest if first_line.strip().lower() in ("json", "") else text
+
     try:
-        payload = json.loads(raw_text)
+        payload = json.loads(text)
     except json.JSONDecodeError as exc:
         raise ValueError(f"replanner did not return valid JSON: {raw_text!r}") from exc
 
@@ -151,8 +158,7 @@ def _build_prompt_message(day: ShootingDay, observation: DayObservation) -> str:
     return "\n".join(lines)
 
 
-async def replan(day: ShootingDay, observation: DayObservation) -> list[RecoveryOption]:
-    """Asks the replanner agent for exactly two recovery options."""
+async def _run_replanner_turn(day: ShootingDay, observation: DayObservation) -> str | None:
     agent = _build_replanner_agent()
     runner = InMemoryRunner(agent=agent, app_name="martini-replanner")
     session = await runner.session_service.create_session(
@@ -166,6 +172,30 @@ async def replan(day: ShootingDay, observation: DayObservation) -> list[Recovery
     ):
         if event.is_final_response() and event.content and event.content.parts:
             raw_text = event.content.parts[0].text
+
+    return raw_text
+
+
+async def replan(day: ShootingDay, observation: DayObservation) -> list[RecoveryOption]:
+    """Asks the replanner agent for exactly two recovery options.
+
+    Retries the whole turn once if the model's turn ends without final
+    text, or raises -- observed in practice as a MALFORMED_FUNCTION_CALL
+    (no final event) or the ADK runner raising over a hallucinated tool
+    name, both from the model emitting pseudo-code instead of real
+    output. A second try with a fresh session recovers from this most
+    of the time.
+    """
+    try:
+        raw_text = await _run_replanner_turn(day, observation)
+    except Exception:
+        raw_text = None
+
+    if raw_text is None:
+        try:
+            raw_text = await _run_replanner_turn(day, observation)
+        except Exception:
+            raw_text = None
 
     if raw_text is None:
         raise RuntimeError("replanner agent produced no final response")

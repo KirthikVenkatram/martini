@@ -24,8 +24,11 @@ The emitter exports these OTel gauge metrics under the meter
   (negative once it has passed) -- the day's own simulated clock, not
   wall-clock time, so read this rather than computing it yourself
 
-Use `query_prometheus` with an instant query for each metric name to
-get its current value (e.g. `martini_error_budget_consumed`).
+First call `list_datasources` and find the Prometheus datasource (prefer
+the one marked default) to get its UID -- Grafana Cloud names this
+per-stack, so it must never be guessed. Use that UID with
+`query_prometheus` for an instant query on each metric name to get its
+current value (e.g. `martini_error_budget_consumed`).
 
 Alert rules for this project are named with a `martini_` prefix (e.g.
 `martini_error_budget_burn`). Use `alerting_manage_rules` to list alert

@@ -43,6 +43,7 @@ READ_TOOLS = [
     "query_loki_logs",
     "search_dashboards",
     "alerting_manage_rules",
+    "list_datasources",
 ]
 """Read-only subset used by the observer subagent (Module 3)."""
 
