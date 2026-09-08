@@ -16,7 +16,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 load_dotenv()
@@ -26,6 +26,7 @@ from emitter.simulator import build_day  # noqa: E402
 from server import derived, narration  # noqa: E402
 from server.provisioning_cache import load_cached_provisioning, save_cached_provisioning  # noqa: E402
 from server.replay import scene_snapshots, start_replay  # noqa: E402
+from server.routes.projects import router as projects_router  # noqa: E402
 from server.state import DEFAULT_SCENARIO, STATE, DaySnapshot, ProvisioningSnapshot  # noqa: E402
 
 _WEB_DIST = Path(__file__).parent.parent / "web" / "dist"
@@ -59,6 +60,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(projects_router)
 
 
 def _sse_format(snapshot: DaySnapshot) -> str:
@@ -77,6 +79,7 @@ def _initial_snapshot() -> DaySnapshot:
         event_type="connected",
         status="idle",
         day_number=day.day_number,
+        total_days=STATE.active_total_days,
         production_title=day.production_title,
         provisioning=provisioning,
         scenes=scene_snapshots(day),
@@ -128,6 +131,14 @@ async def start_day(scenario: str = DEFAULT_SCENARIO) -> JSONResponse:
     if run_id is None:
         return JSONResponse({"detail": "a day is already running"}, status_code=409)
     return JSONResponse({"run_id": run_id})
+
+
+@app.get("/projects", response_model=None)
+async def projects_page() -> FileResponse | JSONResponse:
+    index_path = _WEB_DIST / "index.html"
+    if not index_path.exists():
+        return JSONResponse({"detail": "console not built"}, status_code=404)
+    return FileResponse(index_path)
 
 
 if _WEB_DIST.exists():

@@ -99,3 +99,19 @@ def test_initial_snapshot_falls_back_to_provisioning_state():
 
     assert snapshot.provisioning is not None
     assert snapshot.provisioning.live is False
+
+
+def test_initial_snapshot_reports_the_active_project_total_days():
+    with STATE.lock:
+        STATE.active_total_days = 5
+
+    snapshot = app_module._initial_snapshot()
+
+    assert snapshot.total_days == 5
+
+    with STATE.lock:
+        STATE.active_total_days = 32  # restore the default for other tests
+
+
+def test_projects_page_route_is_registered():
+    assert any(getattr(route, "path", None) == "/projects" for route in app_module.app.routes)
