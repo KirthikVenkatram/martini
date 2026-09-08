@@ -772,8 +772,10 @@ The piece with no spec: `replay_day` (`emitter/simulator.py`) needs per-setup `a
 Append to `tests/test_scheduling.py`:
 
 ```python
+from datetime import timedelta
+
 from agent.root import AT_RISK_ERROR_BUDGET_CONSUMED
-from emitter.models import ShootingDay
+from emitter.models import ShootingDay, Setup
 from emitter.schedule import error_budget_consumed
 from agent.tools.scheduling import generate_scenario
 
@@ -783,8 +785,43 @@ def _day_with_scenes(scene_eighths: dict[str, str], setups_per_scene: int = 1) -
     return build_shooting_day(scenes, [], day_number=1, shoot_date=date(2026, 9, 8), production_title="Test Day")
 
 
+def _tight_day() -> ShootingDay:
+    """A hand-built day (bypassing build_shooting_day's fixed 11-hour
+    template) with only a 30-minute error budget and setups whose
+    baseline timing already finishes the day early -- so the AT_RISK
+    crossing in the test below happens only once generate_scenario's
+    inflation of the longest scene (scene "2", 3 setups) pushes the
+    total elapsed time past it, not from the baseline alone."""
+    general_call = datetime(2026, 9, 8, 7, 0)
+    scheduled_wrap = general_call + timedelta(hours=2)
+    overtime_threshold = scheduled_wrap + timedelta(minutes=30)
+    scenes = [
+        _scene("1", "1", [], setups=1),
+        _scene("2", "6", [], setups=3),
+    ]
+    setups = [
+        Setup(id="1-1", scene_number="1", description="setup", estimated_minutes=20),
+        Setup(id="2-1", scene_number="2", description="setup", estimated_minutes=20),
+        Setup(id="2-2", scene_number="2", description="setup", estimated_minutes=20),
+        Setup(id="2-3", scene_number="2", description="setup", estimated_minutes=20),
+    ]
+    return ShootingDay(
+        day_number=1,
+        production_title="Test Day",
+        shoot_date=general_call.date(),
+        general_call=general_call,
+        scheduled_wrap=scheduled_wrap,
+        overtime_threshold=overtime_threshold,
+        golden_hour_start=overtime_threshold - timedelta(minutes=15),
+        meal_due_by=general_call + timedelta(hours=1),
+        scenes=scenes,
+        setups=setups,
+        performers=[],
+    )
+
+
 def test_generate_scenario_is_deterministic():
-    day = _day_with_scenes({"1": "4", "2": "4", "3": "44"}, setups_per_scene=2)
+    day = _day_with_scenes({"1": "4", "2": "4", "3": "6"}, setups_per_scene=2)
 
     first = generate_scenario(day)
     second = generate_scenario(day)
@@ -794,7 +831,7 @@ def test_generate_scenario_is_deterministic():
 
 
 def test_generate_scenario_covers_every_setup():
-    day = _day_with_scenes({"1": "4", "2": "44"}, setups_per_scene=2)
+    day = _day_with_scenes({"1": "4", "2": "6"}, setups_per_scene=2)
 
     result = generate_scenario(day)
 
@@ -803,10 +840,14 @@ def test_generate_scenario_covers_every_setup():
 
 
 def test_generate_scenario_crosses_at_risk_on_a_tight_day():
-    # A day with almost no error budget (overtime_threshold barely past
-    # scheduled_wrap) and one dominant scene -- inflating that scene's
-    # setups should easily cross AT_RISK well within the cap.
-    day = _day_with_scenes({"1": "4", "2": "44"}, setups_per_scene=2)
+    # scheduled_wrap is 2h after call, overtime_threshold only 30 more
+    # minutes past that (error_budget_total = 30 min). Baseline timing
+    # (4 setups, ~20 min each) finishes around the 80-minute mark --
+    # comfortably inside the 2-hour scheduled length, consumed=0. Only
+    # once scene "2"'s 3 setups (the longest scene, by page_eighths)
+    # are inflated towards their cap does the day's total elapsed time
+    # push past scheduled_wrap + 0.75 * 30min, crossing AT_RISK.
+    day = _tight_day()
 
     result = generate_scenario(day)
 
@@ -817,8 +858,15 @@ def test_generate_scenario_crosses_at_risk_on_a_tight_day():
         setup.actual_minutes = timing["actual_minutes"]
         setup.takes = timing["takes"]
     elapsed = sum(t["actual_minutes"] for t in result.scenario.values())
-    now = working.general_call + __import__("datetime").timedelta(minutes=elapsed)
+    now = working.general_call + timedelta(minutes=elapsed)
     assert error_budget_consumed(working, now) >= AT_RISK_ERROR_BUDGET_CONSUMED
+
+    # And it stayed within Correction 1's cap getting there.
+    for setup in day.setups:
+        if setup.scene_number == "2":
+            timing = result.scenario[setup.id]
+            assert timing["actual_minutes"] <= setup.estimated_minutes * 3
+            assert timing["takes"] <= 15
 
 
 def test_generate_scenario_reports_unreachable_on_a_generously_slacked_day():
@@ -828,7 +876,7 @@ def test_generate_scenario_reports_unreachable_on_a_generously_slacked_day():
     # the loop terminates on the cap rather than searching forever.
     scenes = [_scene("1", "1", [], setups=1)]
     day = build_shooting_day(scenes, [], day_number=1, shoot_date=date(2026, 9, 8), production_title="Test Day")
-    day = day.model_copy(update={"overtime_threshold": day.overtime_threshold + __import__("datetime").timedelta(hours=48)})
+    day = day.model_copy(update={"overtime_threshold": day.overtime_threshold + timedelta(hours=48)})
 
     result = generate_scenario(day)
 
