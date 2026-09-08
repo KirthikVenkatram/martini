@@ -94,6 +94,7 @@ def _base_snapshot(
         status=status,
         error_message=error_message,
         day_number=day.day_number,
+        total_days=STATE.active_total_days,
         production_title=day.production_title,
         provisioning=provisioning,
         scenes=scene_snapshots(day),

@@ -10,7 +10,7 @@ ShootingDay.
 from __future__ import annotations
 
 from emitter.simulator import build_day
-from server.replay import _carry_forward_snapshot, incident_url, scene_snapshots, shot_scene_numbers
+from server.replay import _base_snapshot, _carry_forward_snapshot, incident_url, scene_snapshots, shot_scene_numbers
 from server.state import STATE, DaySnapshot, PaceSnapshot, TimelineSnapshot
 
 _TIMELINE = TimelineSnapshot(
@@ -134,6 +134,20 @@ def test_carry_forward_snapshot_falls_back_to_zeroed_defaults_for_a_stale_run_id
 
     assert snapshot.clock is None
     assert snapshot.error_budget_consumed == 0.0
+
+
+def test_base_snapshot_reports_the_active_project_total_days(monkeypatch):
+    day = build_day("nominal")
+
+    with STATE.lock:
+        STATE.active_total_days = 3
+
+    snapshot = _base_snapshot(day, run_id=1, status="running", event_type="setup_wrapped")
+
+    assert snapshot.total_days == 3
+
+    with STATE.lock:
+        STATE.active_total_days = 32  # restore the default for other tests
 
 
 def test_active_day_and_scenario_falls_back_to_the_named_scenario_when_no_project_is_active(monkeypatch):
