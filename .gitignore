@@ -221,3 +221,4 @@ __marimo__/
 web/node_modules/
 !web/dist/
 CLAUDE.md
+.superpowers/
