@@ -25,7 +25,13 @@ from google import genai
 from google.genai import types
 from google.genai.errors import ClientError
 
-from agent.config import GEMINI_MODEL, GOOGLE_API_KEY, GOOGLE_GENAI_USE_VERTEXAI
+from agent.config import (
+    GEMINI_MODEL,
+    GOOGLE_API_KEY,
+    GOOGLE_CLOUD_LOCATION,
+    GOOGLE_CLOUD_PROJECT,
+    USE_VERTEXAI,
+)
 from agent.tools.quota import check_and_increment
 from emitter.models import PageEighths, Scene
 
@@ -113,7 +119,10 @@ def breakdown_script(pdf_bytes: bytes) -> list[Scene]:
             f"MARTINI's local Gemini quota ({_QUOTA_DAILY_LIMIT} requests/day) is used up for today."
         )
 
-    client = genai.Client(api_key=GOOGLE_API_KEY, vertexai=GOOGLE_GENAI_USE_VERTEXAI.upper() == "TRUE")
+    if USE_VERTEXAI:
+        client = genai.Client(vertexai=True, project=GOOGLE_CLOUD_PROJECT, location=GOOGLE_CLOUD_LOCATION)
+    else:
+        client = genai.Client(vertexai=False, api_key=GOOGLE_API_KEY)
 
     try:
         response = client.models.generate_content(
