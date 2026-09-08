@@ -69,8 +69,11 @@ def build_shooting_day(
             character_name=entry.character_name.upper(),
             call_time=general_call,
             previous_night_wrap=entry.previous_night_wrap,
-            minimum_turnaround_hours=entry.minimum_turnaround_hours
-            or (rules.turnaround.minor_minimum_hours if entry.is_minor else rules.turnaround.minimum_hours),
+            minimum_turnaround_hours=(
+                entry.minimum_turnaround_hours
+                if entry.minimum_turnaround_hours is not None
+                else (rules.turnaround.minor_minimum_hours if entry.is_minor else rules.turnaround.minimum_hours)
+            ),
             is_minor=entry.is_minor,
         )
         for entry in cast

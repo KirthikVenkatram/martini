@@ -71,6 +71,21 @@ def test_build_shooting_day_honors_an_explicit_turnaround_override():
     assert day.performers[0].minimum_turnaround_hours == 13.0
 
 
+def test_build_shooting_day_honors_an_explicit_zero_turnaround_override():
+    scenes = [_scene("1", "1", ["marcus"], setups=1)]
+    cast = [
+        CastEntry(
+            character_name="MARCUS",
+            previous_night_wrap=datetime(2026, 9, 2, 20, 0),
+            minimum_turnaround_hours=0.0,
+        )
+    ]
+
+    day = build_shooting_day(scenes, cast, day_number=1, shoot_date=date(2026, 9, 8), production_title="Test Day")
+
+    assert day.performers[0].minimum_turnaround_hours == 0.0
+
+
 def test_build_shooting_day_joins_scene_cast_ids_to_performer_ids_by_slug():
     scenes = [_scene("1", "1", ["desmond-ruiz"], setups=1)]
     cast = [CastEntry(character_name="Desmond Ruiz", previous_night_wrap=datetime(2026, 9, 2, 20, 0))]
