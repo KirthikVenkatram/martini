@@ -1,6 +1,7 @@
+import { Link } from "./Link";
 import type { DaySnapshot } from "../types";
 
-export function Header({ snapshot }: { snapshot: DaySnapshot }) {
+export function Header({ snapshot, activeProjectTitle }: { snapshot: DaySnapshot; activeProjectTitle?: string }) {
   return (
     <header className="px-4 pt-1.5">
       <div className="flex items-start justify-between gap-4">
@@ -11,6 +12,11 @@ export function Header({ snapshot }: { snapshot: DaySnapshot }) {
             Watches the shooting day. Warns you before you lose it. Won't suggest anything that breaks a union
             rule.
           </p>
+          {activeProjectTitle && (
+            <p className="mt-0.5 font-body text-[10px] text-ink/50">
+              {activeProjectTitle} · <Link to="/projects" className="underline">change production</Link>
+            </p>
+          )}
         </div>
         <div className="shrink-0 font-narrow text-xs uppercase tracking-widest text-ink/50">
           Day {snapshot.day_number} of {snapshot.total_days}
