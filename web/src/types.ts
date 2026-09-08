@@ -122,3 +122,36 @@ export interface DaySnapshot {
   pages_sentence: string;
   cost_of_delay_sentence: string;
 }
+
+export interface ProjectRecord {
+  slug: string;
+  title: string;
+  total_days: number;
+  crew_size: number;
+  created_at: string;
+}
+
+export interface Scene {
+  number: string;
+  synopsis: string;
+  page_eighths: { eighths: number };
+  int_ext: "INT" | "EXT";
+  day_night: "DAY" | "NIGHT";
+  location: string;
+  cast_ids: string[];
+  estimated_setups: number;
+}
+
+export interface CastEntry {
+  character_name: string;
+  is_minor: boolean;
+  previous_night_wrap: string;
+  minimum_turnaround_hours: number | null;
+}
+
+export interface ProjectDetail {
+  project: ProjectRecord;
+  scenes: Scene[] | null;
+  cast: CastEntry[] | null;
+  has_day: boolean;
+}
