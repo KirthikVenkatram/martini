@@ -1,0 +1,181 @@
+[
+  {
+    "number": "1",
+    "synopsis": "Marcus and Elena discuss their financial troubles and a loan while preparing for the day.",
+    "page_eighths": {
+      "eighths": 4
+    },
+    "int_ext": "INT",
+    "day_night": "DAY",
+    "location": "FARMHOUSE KITCHEN",
+    "cast_ids": [
+      "marcus",
+      "elena"
+    ],
+    "estimated_setups": 6
+  },
+  {
+    "number": "2",
+    "synopsis": "Marcus confronts Desmond about a truck's problems and takes its keys despite Desmond's warnings.",
+    "page_eighths": {
+      "eighths": 4
+    },
+    "int_ext": "INT",
+    "day_night": "DAY",
+    "location": "QUARRY OFFICE",
+    "cast_ids": [
+      "marcus",
+      "desmond"
+    ],
+    "estimated_setups": 7
+  },
+  {
+    "number": "3",
+    "synopsis": "Elena and Juno wait at a rail crossing and discuss the family's problems, with Juno sensing something is wrong.",
+    "page_eighths": {
+      "eighths": 4
+    },
+    "int_ext": "EXT",
+    "day_night": "DAY",
+    "location": "RAIL CROSSING",
+    "cast_ids": [
+      "elena",
+      "juno"
+    ],
+    "estimated_setups": 8
+  },
+  {
+    "number": "4",
+    "synopsis": "Desmond stops Juno from walking on a dangerous part of the quarry road on a blasting day, revealing his concern.",
+    "page_eighths": {
+      "eighths": 4
+    },
+    "int_ext": "EXT",
+    "day_night": "DAY",
+    "location": "QUARRY ROAD",
+    "cast_ids": [
+      "desmond",
+      "juno"
+    ],
+    "estimated_setups": 7
+  },
+  {
+    "number": "5",
+    "synopsis": "Marcus confronts Elena and Desmond about missing pages from the ledger, implying someone stole them.",
+    "page_eighths": {
+      "eighths": 2
+    },
+    "int_ext": "INT",
+    "day_night": "NIGHT",
+    "location": "QUARRY OFFICE",
+    "cast_ids": [
+      "marcus",
+      "elena",
+      "desmond"
+    ],
+    "estimated_setups": 8
+  },
+  {
+    "number": "5B",
+    "synopsis": "Marcus presses Elena to explain the ledger discrepancies, and she suggests her explanation won't be believed regardless.",
+    "page_eighths": {
+      "eighths": 1
+    },
+    "int_ext": "INT",
+    "day_night": "NIGHT",
+    "location": "QUARRY OFFICE",
+    "cast_ids": [
+      "marcus",
+      "elena"
+    ],
+    "estimated_setups": 6
+  },
+  {
+    "number": "5C",
+    "synopsis": "Desmond confesses to being responsible for the missing ledger pages, admitting Elena has been covering for him.",
+    "page_eighths": {
+      "eighths": 1
+    },
+    "int_ext": "INT",
+    "day_night": "NIGHT",
+    "location": "QUARRY OFFICE",
+    "cast_ids": [
+      "desmond",
+      "marcus"
+    ],
+    "estimated_setups": 5
+  },
+  {
+    "number": "42",
+    "synopsis": "Elena and Desmond discuss their predicament at the reservoir edge, reflecting on past decisions and their consequences.",
+    "page_eighths": {
+      "eighths": 4
+    },
+    "int_ext": "EXT",
+    "day_night": "NIGHT",
+    "location": "RESERVOIR EDGE",
+    "cast_ids": [
+      "elena",
+      "desmond"
+    ],
+    "estimated_setups": 6
+  },
+  {
+    "number": "42B",
+    "synopsis": "Marcus drives Juno in silence, with the radio's static filling the awkward quiet between them.",
+    "page_eighths": {
+      "eighths": 4
+    },
+    "int_ext": "INT",
+    "day_night": "NIGHT",
+    "location": "MARCUS'S TRUCK",
+    "cast_ids": [
+      "marcus",
+      "juno"
+    ],
+    "estimated_setups": 5
+  },
+  {
+    "number": "42C",
+    "synopsis": "Elena walks alone by the reservoir, reflecting on the office lights in the distance.",
+    "page_eighths": {
+      "eighths": 2
+    },
+    "int_ext": "EXT",
+    "day_night": "NIGHT",
+    "location": "RESERVOIR PATH",
+    "cast_ids": [
+      "elena"
+    ],
+    "estimated_setups": 4
+  },
+  {
+    "number": "42D",
+    "synopsis": "Desmond looks out at the water from the reservoir edge before turning off his truck, leaving it in darkness.",
+    "page_eighths": {
+      "eighths": 5
+    },
+    "int_ext": "EXT",
+    "day_night": "NIGHT",
+    "location": "RESERVOIR EDGE",
+    "cast_ids": [
+      "desmond"
+    ],
+    "estimated_setups": 4
+  },
+  {
+    "number": "43",
+    "synopsis": "Priya meets Marcus at the quarry gate to inform him she is selling her share, and he questions her about the buyer and her decision.",
+    "page_eighths": {
+      "eighths": 17
+    },
+    "int_ext": "EXT",
+    "day_night": "DAY",
+    "location": "QUARRY GATE",
+    "cast_ids": [
+      "marcus",
+      "priya"
+    ],
+    "estimated_setups": 18
+  }
+]

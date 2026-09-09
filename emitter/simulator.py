@@ -1,14 +1,18 @@
 """Replays a shooting day as OTel metrics/logs from a scenario yaml.
 
-Module 1b (the Gemini script breakdown -> data/day_14.json) hasn't run
-yet, so the scene/setup structure below is invented for this demo --
-only each setup's actual_minutes/takes come from the committed
-scenario yaml in emitter/scenarios/. Kept in sync with the equivalent
-fixture in tests/test_schedule.py.
+Scene content (synopsis, page_eighths, int_ext/day_night, cast) comes
+from data/day_14.json -- the committed output of running
+data/day_14_screenplay.pdf through Gemini's multimodal breakdown at
+build time (scripts/build_day.py, Module 1b). This module never calls
+Gemini itself. Which setups get walked, and how long each one takes,
+stays hand-authored in emitter/scenarios/ -- a breakdown has no way to
+know that, and the nominal/slipping split (plus which scenes are
+"present" in each) is a demo-authoring concern, not a screenplay fact.
 """
 
 from __future__ import annotations
 
+import json
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -16,10 +20,11 @@ from typing import Callable
 
 import yaml
 
-from emitter.models import PageEighths, Performer, Scene, ShootingDay, Setup
+from emitter.models import Performer, Scene, ShootingDay, Setup
 from emitter.otel import Instruments
 
 SCENARIOS_DIR = Path(__file__).parent / "scenarios"
+DAY_14_SCENES_PATH = Path(__file__).parent.parent / "data" / "day_14.json"
 
 GENERAL_CALL = datetime(2026, 9, 3, 7, 0)
 SCHEDULED_WRAP = datetime(2026, 9, 3, 18, 0)
@@ -28,12 +33,9 @@ GOLDEN_HOUR_START = datetime(2026, 9, 3, 18, 30)
 MEAL_DUE_BY = datetime(2026, 9, 3, 13, 0)
 MEAL_BREAK_MINUTES = 30
 
-TOTAL_PAGE_EIGHTHS = 52
 PADDING_SCENE_NUMBER = "43"
 RECOVERY_SCENE_NUMBER = "42D"
-RECOVERY_SCENE_EIGHTHS = 5
 
-SCENE_EIGHTHS = {"1": 4, "2": 4, "3": 4, "4": 4, "5": 2, "5B": 1, "5C": 1, "42": 4, "42B": 4, "42C": 2}
 SETUP_SCENES = {
     "1a": "1", "1b": "1",
     "2a": "2",
@@ -104,48 +106,24 @@ JUNO = Performer(
 )
 PERFORMERS = [PRIYA, MARCUS, ELENA, DESMOND, JUNO]
 
-SCENE_CAST = {
-    "1": ["marcus", "elena"],
-    "2": ["marcus", "desmond"],
-    "3": ["elena", "juno"],
-    "4": ["desmond", "juno"],
-    "5": ["marcus", "elena", "desmond"],
-    "5B": ["marcus", "elena", "desmond"],
-    "5C": ["marcus", "elena", "desmond"],
-    "42": ["elena", "desmond"],
-    "42B": ["marcus", "juno"],
-    "42C": ["elena"],
-    PADDING_SCENE_NUMBER: ["priya", "marcus"],
-    RECOVERY_SCENE_NUMBER: ["elena", "desmond"],
-}
-
-# Invented story content -- an invented quarry-town drama, no real film,
-# studio, or person. Spans a believable mix of all four strip colours
-# (the strip board's core visual idea) rather than defaulting every
-# scene to the same slot. Scene 43 (PADDING_SCENE_NUMBER) is PRIYA's
-# only scene on this day and the one gate/rules/production_rules.yaml's
-# turnaround rule ends up rejecting a reorder into -- it needs a real
-# stake, not a placeholder, since it's what the rejection card argues
-# over.
-SCENE_CONTENT = {
-    "1": ("MARCUS and ELENA argue over the household accounts before the crew arrives.", "INT", "DAY"),
-    "2": ("MARCUS presses DESMOND for the truck keys he's been avoiding handing over.", "INT", "DAY"),
-    "3": ("ELENA waits with JUNO at the crossing, dodging her questions about last night.", "EXT", "DAY"),
-    "4": ("DESMOND warns JUNO off the quarry road before the blasting crew arrives.", "EXT", "DAY"),
-    "5": ("The three of them corner each other in the site office over the missing ledger.", "INT", "NIGHT"),
-    "5B": ("MARCUS slides the ledger across the desk and dares ELENA to explain the numbers.", "INT", "NIGHT"),
-    "5C": ("DESMOND admits the missing pages were his doing, not ELENA's.", "INT", "NIGHT"),
-    "42": ("ELENA and DESMOND finally say what's been unsaid at the reservoir's edge.", "EXT", "NIGHT"),
-    "42B": ("MARCUS drives JUNO home in silence, the radio the only thing talking.", "INT", "NIGHT"),
-    "42C": ("ELENA walks the reservoir path alone, turning the night over in her head.", "EXT", "NIGHT"),
-    RECOVERY_SCENE_NUMBER: ("One last look back at the water before DESMOND cuts the engine.", "EXT", "NIGHT"),
-    PADDING_SCENE_NUMBER: ("PRIYA returns to the quarry gate and tells MARCUS she's selling her share.", "EXT", "DAY"),
-}
-
 
 def load_scenario(name: str) -> dict[str, dict]:
     with open(SCENARIOS_DIR / f"{name}.yaml") as f:
         return yaml.safe_load(f)["setups"]
+
+
+def _load_day_14_scenes() -> dict[str, Scene]:
+    """Scene content for every scene any scenario might reference,
+    keyed by scene number -- the committed output of running
+    data/day_14_screenplay.pdf through Gemini's breakdown
+    (scripts/build_day.py). Cast names in the screenplay were written
+    to match the PERFORMERS ids above exactly (slugify_character_name
+    turns "PRIYA" into "priya", etc.), so Scene.cast_ids already lines
+    up with Performer.id without either side needing an explicit id.
+    """
+    with open(DAY_14_SCENES_PATH) as f:
+        raw_scenes = json.load(f)
+    return {raw["number"]: Scene.model_validate(raw) for raw in raw_scenes}
 
 
 def build_day(scenario_name: str) -> ShootingDay:
@@ -159,27 +137,14 @@ def build_day(scenario_name: str) -> ShootingDay:
     scenario_setups = load_scenario(scenario_name)
     nominal_setups = scenario_setups if scenario_name == "nominal" else load_scenario("nominal")
 
-    present_scenes = {SETUP_SCENES[setup_id] for setup_id in scenario_setups}
-    scene_eighths = dict(SCENE_EIGHTHS)
-    if RECOVERY_SCENE_NUMBER in present_scenes:
-        scene_eighths[RECOVERY_SCENE_NUMBER] = RECOVERY_SCENE_EIGHTHS
-    scene_eighths[PADDING_SCENE_NUMBER] = TOTAL_PAGE_EIGHTHS - sum(scene_eighths.values())
-
-    scenes = []
-    for number, eighths in scene_eighths.items():
-        synopsis, int_ext, day_night = SCENE_CONTENT.get(number, (f"Scene {number}", "INT", "DAY"))
-        scenes.append(
-            Scene(
-                number=number,
-                synopsis=synopsis,
-                page_eighths=PageEighths(eighths=eighths),
-                int_ext=int_ext,
-                day_night=day_night,
-                location="Set",
-                cast_ids=SCENE_CAST.get(number, []),
-                estimated_setups=1,
-            )
-        )
+    # Every scene any scenario's setups reference, in shooting order,
+    # plus the padding scene (43) at the end -- it has no setups of
+    # its own, on the board but never actually shot in this replay,
+    # exactly the flexibility a reorder/pickup option would use it for.
+    day_14_scenes = _load_day_14_scenes()
+    present_scene_numbers = list(dict.fromkeys(SETUP_SCENES[setup_id] for setup_id in scenario_setups))
+    present_scene_numbers.append(PADDING_SCENE_NUMBER)
+    scenes = [day_14_scenes[number] for number in present_scene_numbers]
 
     setups = [
         Setup(

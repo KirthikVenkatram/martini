@@ -222,3 +222,4 @@ web/node_modules/
 !web/dist/
 CLAUDE.md
 .superpowers/
+data/gemini_quota.json
