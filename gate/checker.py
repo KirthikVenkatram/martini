@@ -11,10 +11,12 @@ new logic here is which threshold applies to whom, and turning the
 result into a plain-English reason.
 
 crew_rest governs rest between shooting days (wrap on one day to call
-on the next). A RecoveryOption only ever reschedules performers within
-the *current* day (ShootingDay has no next-day call time to compare
-against), so the rule is loaded and validated like the other three but
-has no path that can trigger it yet.
+on the next). Only a move_to_pickups option can trigger it: its
+proposed_call_times are written on the shoot date (the replanner has
+no other day's calendar to draw from), so this module treats them as
+falling on the day after this one's scheduled_wrap when checking rest.
+Every other option kind stays within the current day, where the
+turnaround rule already governs rest.
 """
 
 from __future__ import annotations
@@ -211,7 +213,33 @@ def _check_minors(day: ShootingDay, option: RecoveryOption, rules: ProductionRul
 
 
 def _check_crew_rest(day: ShootingDay, option: RecoveryOption, rules: ProductionRules) -> list[Violation]:
-    return []
+    if option.kind != "move_to_pickups":
+        return []
+
+    violations = []
+    required = timedelta(hours=rules.crew_rest.minimum_hours_between_days)
+    for performer_id, proposed_call_time in (option.proposed_call_times or {}).items():
+        performer = _performer_by_id(day, performer_id)
+        # proposed_call_time is written on the shoot date (the replanner
+        # never has another day's calendar to draw from) but a
+        # move_to_pickups call means the following day -- shift it
+        # forward one day before comparing it against this day's wrap.
+        pickup_call_time = proposed_call_time + timedelta(days=1)
+        actual = pickup_call_time - day.scheduled_wrap
+        if actual >= required:
+            continue
+
+        shortfall = required - actual
+        reason = rules.crew_rest.description.format(
+            name=performer.character_name,
+            shortfall=_format_timedelta(shortfall),
+            required=_format_hours(rules.crew_rest.minimum_hours_between_days),
+            given=_format_timedelta(actual),
+        )
+        violations.append(
+            Violation(rule="crew_rest", performer_id=performer.character_name, shortfall=shortfall, reason=reason)
+        )
+    return violations
 
 
 def check(day: ShootingDay, option: RecoveryOption) -> GateVerdict:

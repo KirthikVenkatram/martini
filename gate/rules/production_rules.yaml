@@ -24,5 +24,6 @@ minors:
 crew_rest:
   minimum_hours_between_days: 10.0
   description: >-
-    Crew need at least {minimum_hours} hours between the end of one
-    shooting day and the call for the next.
+    Calls {name} back {shortfall} inside the required rest between
+    days -- {name} needs {required} between tonight's wrap and the
+    pickup-day call, this option gives {name} {given}.

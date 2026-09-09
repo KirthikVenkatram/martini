@@ -53,6 +53,19 @@ MARCUS = Performer(
     is_minor=False,
 )
 
+# No previous_night_wrap and not a minor -- isolates the crew_rest path
+# from the turnaround and minors checks, which would otherwise also
+# fire on the same proposed_call_times entry.
+RENA = Performer(
+    id="rena",
+    name="Rena Test",
+    character_name="RENA",
+    call_time=datetime(2026, 9, 3, 10, 0),
+    previous_night_wrap=None,
+    minimum_turnaround_hours=11.0,
+    is_minor=False,
+)
+
 
 def _make_day() -> ShootingDay:
     return ShootingDay(
@@ -66,14 +79,18 @@ def _make_day() -> ShootingDay:
         meal_due_by=MEAL_DUE_BY,
         scenes=[],
         setups=[],
-        performers=[PRIYA, JULIAN, MARCUS],
+        performers=[PRIYA, JULIAN, MARCUS, RENA],
     )
 
 
-def _option(option_id: str, proposed_call_times: dict[str, datetime] | None) -> RecoveryOption:
+def _option(
+    option_id: str,
+    proposed_call_times: dict[str, datetime] | None,
+    kind: str = "reorder",
+) -> RecoveryOption:
     return RecoveryOption(
         id=option_id,
-        kind="reorder",
+        kind=kind,
         description="Reorder to pull a scene forward.",
         affected_scenes=["1"],
         minutes_recovered=20,
@@ -138,6 +155,49 @@ def test_meal_window_breach_is_rejected():
     assert meal_violations[0].performer_id is None
     assert meal_violations[0].shortfall == timedelta(hours=1)
     assert "13:00" in meal_violations[0].reason
+
+
+def test_pickup_day_call_too_soon_after_wrap_is_rejected():
+    day = _make_day()
+    # scheduled_wrap is 2026-09-03 18:00. A move_to_pickups call time is
+    # written on the shoot date (per the replanner's contract) but means
+    # the following day -- 2026-09-04 03:00 here, 9 hours after wrap,
+    # an hour short of the 10-hour minimum.
+    option = _option("opt-pickup", {"rena": datetime(2026, 9, 3, 3, 0)}, kind="move_to_pickups")
+
+    verdict = check(day, option)
+
+    assert verdict.approved is False
+    crew_rest_violations = [v for v in verdict.violations if v.rule == "crew_rest"]
+    assert len(crew_rest_violations) == 1
+    assert crew_rest_violations[0].performer_id == "RENA"
+    assert crew_rest_violations[0].shortfall == timedelta(hours=1)
+    assert "RENA" in crew_rest_violations[0].reason
+
+
+def test_pickup_day_call_with_enough_rest_is_approved():
+    day = _make_day()
+    # 2026-09-04 08:00 is 14 hours after the 18:00 wrap -- clears the
+    # 10-hour minimum.
+    option = _option("opt-pickup-ok", {"rena": datetime(2026, 9, 3, 8, 0)}, kind="move_to_pickups")
+
+    verdict = check(day, option)
+
+    assert verdict.approved is True
+    assert verdict.violations == []
+
+
+def test_crew_rest_does_not_apply_outside_move_to_pickups():
+    day = _make_day()
+    # Same tight same-day gap as the rejected pickup-day case above, but
+    # this option doesn't move anyone to a pickup day -- crew_rest has
+    # nothing to compare against and must not fire.
+    option = _option("opt-reorder", {"rena": datetime(2026, 9, 3, 3, 0)}, kind="reorder")
+
+    verdict = check(day, option)
+
+    assert verdict.approved is True
+    assert verdict.violations == []
 
 
 def test_clean_option_is_approved_with_zero_violations():

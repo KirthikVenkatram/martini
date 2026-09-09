@@ -113,5 +113,5 @@ def test_initial_snapshot_reports_the_active_project_total_days():
         STATE.active_total_days = 32  # restore the default for other tests
 
 
-def test_projects_page_route_is_registered():
-    assert any(getattr(route, "path", None) == "/projects" for route in app_module.app.routes)
+def test_console_page_route_is_registered():
+    assert any(getattr(route, "path", None) == "/day/14" for route in app_module.app.routes)
