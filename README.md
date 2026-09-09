@@ -1,5 +1,7 @@
 # MARTINI
 
+<img src="docs/images/logo.png" alt="MARTINI logo" width="200" />
+
 An AI agent that treats a film shooting day as a production system it is on call for.
 
 MARTINI reads a screenplay, breaks it down into scenes, builds the shooting day,
