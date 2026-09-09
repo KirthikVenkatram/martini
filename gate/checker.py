@@ -125,6 +125,20 @@ def _format_hours(hours: float) -> str:
     return _format_timedelta(timedelta(hours=hours))
 
 
+def _format_clock(moment: datetime, *, on_pickup_day: bool) -> str:
+    """A bare HH:MM reads as later-today. The replanner is instructed
+    (prompts/replanner.md) to never write a date other than the shoot
+    date -- it has no other day's calendar to draw from -- so a
+    move_to_pickups option's call times land on that same date even
+    though they mean a different, future day. Going by option.kind
+    rather than comparing dates is what actually catches that case;
+    comparing moment.date() to day.shoot_date never would."""
+    clock = f"{moment:%H:%M}"
+    if on_pickup_day:
+        return f"{clock} on the pickup day"
+    return clock
+
+
 def _check_turnaround(day: ShootingDay, option: RecoveryOption, rules: ProductionRules) -> list[Violation]:
     violations = []
     for performer_id, proposed_call_time in (option.proposed_call_times or {}).items():
@@ -165,7 +179,7 @@ def _check_meal(day: ShootingDay, option: RecoveryOption, rules: ProductionRules
 
     reason = rules.meal.description.format(
         meal_due_by=f"{day.meal_due_by:%H:%M}",
-        latest=f"{latest:%H:%M}",
+        latest=_format_clock(latest, on_pickup_day=option.kind == "move_to_pickups"),
     )
     return [Violation(rule="meal", performer_id=None, shortfall=latest - day.meal_due_by, reason=reason)]
 
@@ -187,7 +201,7 @@ def _check_minors(day: ShootingDay, option: RecoveryOption, rules: ProductionRul
         reason = rules.minors.description.format(
             name=performer.character_name,
             must_wrap_by=rules.minors.must_wrap_by,
-            projected_wrap=f"{projected_wrap:%H:%M}",
+            projected_wrap=_format_clock(projected_wrap, on_pickup_day=option.kind == "move_to_pickups"),
             shortfall=_format_timedelta(shortfall),
         )
         violations.append(

@@ -7,6 +7,7 @@ import { ProvisioningFooter } from "../components/ProvisioningFooter";
 import { RecoveryOptions } from "../components/RecoveryOptions";
 import { StartButton } from "../components/StartButton";
 import { StripBoard } from "../components/StripBoard";
+import { ThinkingIndicator } from "../components/ThinkingIndicator";
 import { Verdict } from "../components/Verdict";
 import { useDaySnapshot } from "../hooks/useDaySnapshot";
 
@@ -34,8 +35,9 @@ export default function Console() {
         <PaceLine pace={snapshot.pace} />
       </div>
       <div className="flex justify-center px-4 py-0.5">
-        <StartButton status={snapshot.status} />
+        <StartButton status={snapshot.status} dayNumber={snapshot.day_number} />
       </div>
+      {snapshot.status === "at_risk" && !snapshot.recovery && <ThinkingIndicator />}
       {snapshot.error_message && (
         <p className="px-4 py-1 font-body text-xs text-paper/70">Stalled: {snapshot.error_message}</p>
       )}

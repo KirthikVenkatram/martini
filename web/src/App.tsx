@@ -5,6 +5,6 @@ import { useRoute } from "./router";
 export default function App() {
   const pathname = useRoute();
 
-  if (pathname === "/projects") return <Projects />;
-  return <Console />;
+  if (pathname === "/day/14") return <Console />;
+  return <Projects />;
 }

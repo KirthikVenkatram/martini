@@ -14,17 +14,18 @@ export default function Projects() {
 
   return (
     <main className="min-h-screen bg-board px-6 py-8 text-paper">
-      <div className="mx-auto flex max-w-3xl items-center justify-between pb-6">
+      <div className="mx-auto max-w-3xl pb-6">
         <h1 className="font-narrow text-xl font-bold uppercase tracking-widest">Productions</h1>
-        <Link to="/" className="font-body text-xs text-paper/60 underline">
-          Back to the console
-        </Link>
       </div>
 
       {creating ? (
         <NewProduction onCancel={() => setCreating(false)} />
       ) : (
         <div className="mx-auto grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3">
+          <Link to="/day/14" className="block rounded-sm bg-paper p-3 text-ink">
+            <p className="font-narrow text-sm font-bold">Invented Production</p>
+            <p className="font-body text-xs text-ink/50">Sample production</p>
+          </Link>
           {projects.map((project) => (
             <div key={project.slug} className="rounded-sm bg-paper p-3 text-ink">
               <p className="font-narrow text-sm font-bold">{project.title}</p>

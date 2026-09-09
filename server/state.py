@@ -27,6 +27,7 @@ EventType = Literal[
     "setup_wrapped",
     "scene_wrapped",
     "meal_break",
+    "at_risk",
     "recovery",
     "wrapped",
     "error",

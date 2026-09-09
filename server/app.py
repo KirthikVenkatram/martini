@@ -133,8 +133,8 @@ async def start_day(scenario: str = DEFAULT_SCENARIO) -> JSONResponse:
     return JSONResponse({"run_id": run_id})
 
 
-@app.get("/projects", response_model=None)
-async def projects_page() -> FileResponse | JSONResponse:
+@app.get("/day/14", response_model=None)
+async def console_page() -> FileResponse | JSONResponse:
     index_path = _WEB_DIST / "index.html"
     if not index_path.exists():
         return JSONResponse({"detail": "console not built"}, status_code=404)

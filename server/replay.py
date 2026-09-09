@@ -172,6 +172,7 @@ def _trigger_recovery_if_at_risk(day: ShootingDay, run_id: int, now: datetime) -
 
     with STATE.lock:
         STATE.status = "at_risk"
+    STATE.publish(_carry_forward_snapshot(day, run_id, "at_risk", "at_risk"))
 
     cycle_result = asyncio.run(run_recovery_cycle(day))
 

@@ -6,6 +6,9 @@ export function Header({ snapshot, activeProjectTitle }: { snapshot: DaySnapshot
     <header className="px-4 pt-1.5">
       <div className="flex items-start justify-between gap-4">
         <div>
+          <Link to="/" className="font-body text-[10px] text-ink/50 underline">
+            ← All productions
+          </Link>
           <div className="font-narrow text-lg font-bold uppercase tracking-[0.2em] text-ink">MARTINI</div>
           <div className="font-body text-[11px] leading-tight text-ink/55">making the day</div>
           <p className="mt-0.5 max-w-xs font-body text-[10px] leading-snug text-ink/40">
@@ -14,7 +17,7 @@ export function Header({ snapshot, activeProjectTitle }: { snapshot: DaySnapshot
           </p>
           {activeProjectTitle && (
             <p className="mt-0.5 font-body text-[10px] text-ink/50">
-              {activeProjectTitle} · <Link to="/projects" className="underline">change production</Link>
+              {activeProjectTitle} · <Link to="/" className="underline">change production</Link>
             </p>
           )}
         </div>

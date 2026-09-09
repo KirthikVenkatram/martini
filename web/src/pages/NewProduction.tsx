@@ -70,7 +70,7 @@ export default function NewProduction({ onCancel }: { onCancel: () => void }) {
       await saveCast(project.slug, cast);
       await buildDay(project.slug, 1, new Date().toISOString().slice(0, 10));
       await activateProject(project.slug);
-      navigate("/");
+      navigate("/day/14");
     } catch (err) {
       setError((err as Error).message);
       setOpening(false);
