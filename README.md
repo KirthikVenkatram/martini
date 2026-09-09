@@ -1,6 +1,8 @@
 # MARTINI
 
-<img src="docs/images/logo.png" alt="MARTINI logo" width="200" />
+<p align="center">
+  <img src="docs/images/logo.png" alt="MARTINI logo" width="600" />
+</p>
 
 An AI agent that treats a film shooting day as a production system it is on call for.
 
